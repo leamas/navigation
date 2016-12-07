@@ -1,0 +1,51 @@
+<head>
+	<meta charset="UTF-8" />
+	<title>Boats</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://code.vostrel.cz/jquery.reel.js"></script>
+	<script src="jquery.mousewheel.js"></script>
+    <link rel="stylesheet" type="text/css" href="boats.css">
+</head>
+<body style="background-color:#110363;">
+
+<img src="ship-0.png"
+     width="320" height="200"
+     class="reel"
+     id="image"
+     data-image="ships-reel.png"
+     data-frames="32"
+     data-footage="6"
+     data-cw="true">
+
+<script>
+function setNight () {
+    document.body.style.backgroundColor = "#212122";
+    return false;
+};
+function setDusk () {
+    document.body.style.backgroundColor = "#110363";
+    return false;
+}
+</script>
+
+<div class="footer">
+    <a href="#" onclick="setNight()"><img src="night.png"> </a>
+    <a href="#" onclick="setDusk()"><img src="dusk.png"> </a>
+</div>
+
+</body>
+</html>
+
+<!--
+<div class="reel-annotation"
+      id="the_man"
+      data-start="11"
+      data-end="28"
+      data-x="0"
+      data-y="5"
+      data-for="image">
+          Mr.Kluka himself
+    </div>
+-->
+
+
