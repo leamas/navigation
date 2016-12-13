@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -x
+
+i=0
+
+while true; do
+    prev="img$i.html"
+    i=$(( i + 1))
+    this="img$i.html"
+    next="img$((i + 1)).html"
+    if ! test -e "img$i.png"; then
+	exit 0;
+    fi;
+    sed -e "/prev.png/s/img0.html/$prev/" \
+	-e "/next.png/s/img1.html/$next/" \
+	-e "/img src=/s/img0/img$i/" \
+	< img0.html > $this
+    if test $i -ge 6 -a $i -le 16; then
+	sed -i 's/ffffff/000000/' $this
+    fi
+done
+
+
+

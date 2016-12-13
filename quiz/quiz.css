@@ -1,0 +1,30 @@
+.next {
+    color: #797979;
+    position: fixed;
+    bottom: 0%;
+    right: 0;
+    display: inline-block;
+    padding: 0.5em;
+}
+
+.prev {
+    color: #797979;
+    position: fixed;
+    bottom: 0%;
+    left: 0;
+    display: inline-block;
+    padding: 0.5em;
+}
+
+/**
+img {
+    image-rendering: crisp-edges ;              /* CSS3           /
+    image-rendering: -moz-crisp-edges;          /* Firefox        /
+    image-rendering: -o-crisp-edges;            /* Opera          /
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and
+                                                   eventually Safari) /
+    image-rendering: pixelated;                 /* Chrome
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+            /
+}
+
+**/
