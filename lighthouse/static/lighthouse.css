@@ -1,0 +1,128 @@
+
+body {
+    font-family: Sans-Serif;
+}
+
+#house {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -135px 0 0 -135px;
+  background: black;
+}
+
+#house a {
+    outline-style: none;
+}
+
+/* Green, red and white windows applied on top of house. */
+.light  {
+    position: absolute;
+    left: 60px;
+    top: 51px;
+    display: none;
+}
+
+
+/* The "Show explanation" question mark. */
+#showLegend {
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: 2em;
+    border: none;
+    text-decoration: none;
+}
+
+
+/* Overall legend : text + picture. */
+#legend {
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: 70%;
+    text-decoration: none;
+}
+
+
+#legendImg {
+    float: right;
+}
+
+
+#legendText {
+    color: white;
+    text-align: right;
+    width: 100%;
+    padding-right: 1em;
+    text-decoration: none;
+}
+
+
+
+/* The three bars menu image. */
+#menuImg {
+    float:left;
+}
+
+
+/* Menu links text strings. */
+#menuText {
+    vertical-align: -20%;
+    display: inline-block;
+    padding-left: 1em;
+}
+
+/* The "Select Example" drop-down button. */
+.dropbtn {
+    background-color: black;
+    color: white;
+    min-width: 15%;
+    padding-top: 0.5em;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* Overall dropdown container. */
+.dropdown {
+    position: relative;
+    display: block;
+    max-width: 9em;
+}
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: black;
+    font-size: small;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    padding-bottom: 0.5em;
+    max-width: 8em;
+    overflow: auto;
+    z-index: 1;
+}
+
+/* links in drop-dwopn menu. */
+.dropdown-content a {
+    text-decoration: none;
+    color: white;
+    display: block;
+}
+
+/* Highlight links when hovered over. */
+.dropdown a:hover {
+    background-color: #686868;
+}
+
+/* Display drop-down if button is hovered over. */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Higlight the menu image when hovered. */
+.dropbtn:hover  img {
+    background-color: #686868;
+}

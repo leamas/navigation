@@ -1,0 +1,50 @@
+<!doctype html>
+<!--
+    Copyright (c) Alec Leamas 2017
+
+    Distributed under the GNU Public license, version 2 or any
+    more recent of the GPL.
+
+-->
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="api.css"/>
+    <script src="lighthouse.js"></script>
+  </head>
+  <body >
+    <div id="leftCol">
+      <h3 id="header"> <font color="white">Available lights </font></h3>
+      <a href="#" onclick="loadIframe('FR');"> FR </a>
+      <a href="#" onclick="loadIframe('occult-5s');"> OC 5s </a>
+      <a href="#" onclick="loadIframe('occult-2-5s');"> Oc(2) 5s </a>
+      <a href="#" onclick="loadIframe('iso-5s');"> ISO 5s </a>
+      <a href="#" onclick="loadIframe('long-flash-10s');"> L Fl 10s </a>
+      <a href="#" onclick="loadIframe('long-flash-2-20s');"> L Fl(2) 20s </a>
+      <a href="#" onclick="loadIframe('flash-3s');"> Fl 3s </a>
+      <a href="#" onclick="loadIframe('flash-2-6s');"> Fl(2) 6s </a>
+      <a href="#" onclick="loadIframe('quick');"> Q </a>
+      <a href="#" onclick="loadIframe('quick-3-10s');"> Q(3) 10s </a>
+      <a href="#" onclick="loadIframe('quick-9-15s');"> Q(9) 15s </a>
+      <a href="#" onclick="loadIframe('quick-6-long-flash-15s');">
+          Q(6) L Fl 15s
+      </a>
+      <a href="#" onclick="loadIframe('interrupted-quick-15s');"> IQ 15s </a>
+      <a href="#" onclick="loadIframe('very-quick');"> VQ </a>
+      <a href="#" onclick="loadIframe('very-quick-3-5s');"> VQ(3) 5s </a>
+      <a href="#" onclick="loadIframe('very-quick-9-10s');"> VQ(9) 10s </a>
+      <a href="#" onclick="loadIframe('very-quick-6-long-flash-10s');">
+          VQ(6) L Fl 10s
+      </a>
+      <a href="#" onclick="loadIframe('morse-k');"> Mo (-.-) 10s </a>
+      <a href="#" onclick="loadIframe('alternate-white-red');"> Al W R 5s </a>
+      <a href="#" onclick="loadIframe('flash-2-2-white-green');">
+          Al Fl (2+2) W G 10s
+      </a>
+      <hr/>
+      <a href="index.html">Training view</a>
+     </div>
+    <iframe src="index.html?nolegend=1" id="demoFrame" name="demoFrame"><iframe>
+  </body>
+</html>

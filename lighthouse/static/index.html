@@ -1,0 +1,90 @@
+<!doctype html>
+<!--
+    Copyright (c) Alec Leamas 2017
+
+    Distributed under the GNU Public license, version 2 or any
+    more recent of the GPL.
+
+    Simple lighthouse simulator. Highlights:
+        - REST API accepting two query parameters:
+          - kind: Type of flashing
+          - title: Displayed as selected item in menu
+        - Accepts 'g', 'r', and 'w' keyclicks on the lighthouse
+          to switch the colour used for on-colour schemes.
+-->
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="lighthouse.css"/>
+    <script src="lighthouse.js"></script>
+  </head>
+  <body bgcolor="black" onload="dispatch();" >
+    <div id="house">
+      <a href="#" onkeypress="check_keypress(event)">
+        <img src="Rödkallen-natt.png" />
+      </a>
+      <img src="white.png" class="light" id="white" />
+      <img src="red.png" class="light" id="red" />
+      <img src="green.png" class="light" id="green" />
+    </div>
+    <div class="menu" id="menu">
+      <div class="dropdown" >
+        <button onclick="return false;" class="dropbtn">
+            <img src="menu.png" id="menuImg" />
+            <div id="menuText"> &mdash; </div>
+        </button>
+        <div id="myDropdown" class="dropdown-content">
+          <a href="#" onclick="set_location('flash-3s', '1')">Example 1</a>
+          <a href="#" onclick="set_location('occult-5s', '2')">Example 2</a>
+          <a href="#" onclick="set_location('occult-2-5s', '3')">Example 3</a>
+          <a href="#" onclick="set_location('iso-5s', '4')">Example 4</a>
+          <a href="#" onclick="set_location('long-flash-10s', '5')">Example 5</a>
+          <a href="#" onclick="set_location('long-flash-2-20s', '6')">
+              Example 6
+          </a>
+          <a href="#" onclick="set_location('flash-2-6s', '7')">Example 7</a>
+          <a href="#" onclick="set_location('quick', '8')">Example 8</a>
+          <a href="#" onclick="set_location('quick-3-10s', '9')">Example 9</a>
+          <a href="#" onclick="set_location('quick-9-15s', '10')">Example 10</a>
+          <a href="#" onclick="set_location('quick-6-long-flash-15s', '11')">
+            Example 11
+          </a>
+          <a href="#" onclick="set_location('interrupted-quick-15s', '12')">
+            Example 12
+          </a>
+          <a href="#" onclick="set_location('very-quick', '13')">Example 13</a>
+          <a href="#" onclick="set_location('very-quick-3-5s', '14')">
+            Example 14
+          </a>
+          <a href="#" onclick="set_location('very-quick-9-10s', '15')">
+            Example 15
+          </a>
+          <a href="#" onclick="set_location('very-quick-6-long-flash-10s', '16')">
+            Example 16
+          </a>
+          <a href="#" onclick="set_location('alternate-white-red', '17')">
+            Example 17
+          </a>
+          <a href="#" onclick="set_location('morse-k', '18')">Example 18</a>
+          <a href="#" onclick="set_location('flash-2-2-white-green', '19')">
+            Example 19
+          </a>
+          <hr/>
+          <a href="api.html">Demo view</a>
+        </div>
+      </div>
+      <a href="#" onclick="hideLegend();" id="legend">
+        <table style='width: 100%'>
+          <tr>
+              <td><div id="legendText"><div></td>
+              <td><img id="legendImg" /></td>
+          </tr>
+        </table>
+      </a>
+      <a href="#" onclick="showLegend();" id="showLegend">
+        <font color="white">?</font>
+      </a>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+body {
+    color: white;
+    background-color: black;
+    font-family: sans-serif;
+}
+
+#demoFrame {
+    max-width: 100%;
+    width: 70%;
+    height: 30em;
+    float: right;
+    border: none;
+}
+
+#leftCol {
+    max-width: 30%;
+    height: 100%;
+    float: left;
+}
+
+#leftCol a {
+    display: block;
+    text-decoration: none;
+    color: #686868;
+}
+
+#leftCol a:hover {
+    color: black;
+    background-color: #686868;
+}
