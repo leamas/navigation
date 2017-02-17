@@ -7,6 +7,7 @@
 body {
     padding: 0;
     margin: 0;
+    background-color: black;
 }
 
 
@@ -14,6 +15,7 @@ div.tab {
     overflow: hidden;
     background-color: #686868;
     color: white;
+    margin: 0 0 0 0;
 }
 
 div.tab a, div.tab img {
@@ -44,31 +46,30 @@ div.tab a:focus, .active {
     border-radius: 0.6em 0.6em 0 0;
 }
 
-#dd-all:hover  .dropdown {
+#dd-menu:hover  .dropdown {
     display: block;
 }
 
 .dropdown {
     position: absolute;
     top: 3em;
-    height: 100%
+    padding-top: 1em;
     overflow: auto;
     z-index: 1;
-    padding-top: 1em;
-    max-width: 11em;
     background-color: #686868;
     display: none;
 }
 
-.dropdown-content a, .dropdown-content hr {
-    padding-top: 0.1em;
-    padding-bottom: 0.1em;
+.dropdown hr, .dropdown a:visited, .dropdown  a:link {
     display: block;
+    padding: 0.3em 0.4em 0.3em 1em;
+    margin: 0 0 0 0;
+    clear: left;
     background-color: #686868;
     color: white;
     text-decoration: none;
     outline-style: none;
-    text-align: left;
+    border: none
 }
 
 .dropdown a:hover {

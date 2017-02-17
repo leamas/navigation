@@ -6,24 +6,40 @@
 
 */
 
-
-function openCity(evt, cityName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+/** Return query parameter from current url. */
+function getParameterByName(name) {
+    var url = window.location.href;
+    url = decodeURIComponent(url);
+    if (url.indexOf('?') == -1)
+        return null;
+    var query = url.split('?')[1]
+    var params = query.split('&');
+    for (var i = 0; i < params.length; i += 1) {
+        var param = params[i].split('=');
+        if (param[0] == name) {
+            return param[1] ? param[1] : '1';
+        }
     }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the link that opened the tab
-    document.getElementById(cityName).style.display = "block";
-    evt.currentTarget.className += " active";
+    return null;
 }
+
+function handleLightParameter(param) {
+    if (getParameterByName(param) == null)
+        return null;
+    var style = document.getElementById(param).style;
+    if (style != null)
+        style.display = 'block';
+    else
+        console.log("No such element to display: " + param);
+}
+
+
+function onBodyLoad() {
+    var lights = [
+        'running', 'power', 'power-50m', 'running', 'no-command',
+        'restr-man', 'draft', 'fisher', 'trawler', 'pilot', 'tugboat'
+    ];
+    for (var i = 0; i < lights.length; i += 1)
+        handleLightParameter(lights[i]);
+}
+
