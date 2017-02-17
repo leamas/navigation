@@ -9,6 +9,7 @@
     z-index: 1;
     display: inline-block;
     position: relative;
+    float: right;
 }
 
 #running {
@@ -16,7 +17,7 @@
     z-index: 3;
     position: absolute;
     top: 0px;
-    left: 0px;
+    right: 0px;
 }
 
 #power, #power-50m {
@@ -24,7 +25,7 @@
     z-index: 4;
     position: absolute;
     top: 10px;
-    left: 7px;
+    right: 7px;
 }
 
 #no-command, #restr-man, #draft, #fisher, #trawler, #pilot {
@@ -32,5 +33,5 @@
     z-index: 5;
     position: absolute;
     top: 0px;
-    left: 7px;
+    right: 7px;
 }

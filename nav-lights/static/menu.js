@@ -17,34 +17,49 @@ function loadShip(base_url) {
     window.frames['shipFrame'].location = url;
 }
 
+function getIframeElementById(id_) {
+    var iframe = document.getElementById('shipFrame');
+    var innerDoc = (iframe.contentDocument) ?
+        iframe.contentDocument : iframe.contentWindow.document;
+    return innerDoc.getElementById(id_);
+}
+
+
+function clear_lights() {
+    var allLights = [
+        'running', 'power', 'power-50m', 'fisher', 'trawler',
+         'no-command', 'restr-man', 'draft', 'pilot', 'tugboat'
+    ];
+    for (var i = 0; i < allLights.length; i += 1)
+         remove_light(allLights[i]);
+
+}
 
 function add_light(light) {
-    var body = document.getElementById('pageBody');
-    var value = body.getAttribute('data-lights');
-    value = value == null ? light : value + " " + light;
-    body.setAttribute('data-lights', value);
+     var style = getIframeElementById(light).style;
+     if (style)
+         style.display = 'block';
 }
 
 function remove_light(light) {
-    var body = document.getElementById('pageBody');
-    var value = body.getAttribute('data-lights');
-    value = value.replace(light, "");
-    value = value.replace("  ", " ");
-    body.setAttribute('data-lights', value);
+    try {
+        var style = getIframeElementById(light).style;
+        if (style)
+            style.display = 'none'
+    } catch(e) {
+        console.log("Cannot clear light: " + light);
+    }
 }
 
 function toggle_light(light) {
-    var body = document.getElementById('pageBody');
-    var value = body.getAttribute('data-lights');
-    if (value.inndexOf(light) == -1)
-        remove_light(light)
-    else
-        add_light(light)
+    var style = getIframeElementById(light).style;
+    style.display = style.display == 'none' ? 'block' : 'none';
 }
 
 function do_set_lights(lights) {
-    var body = document.getElementById('pageBody');
-    body.setAttribute('data-lights', lights);
+    clear_lights();
+    for (var i = 0; i < lights.length; i += 1)
+        add_light(lights[i]);
 }
 
 
@@ -59,22 +74,27 @@ function get_lights() {
 
 function set_lights(ship) {
     if (ship == 'power')
-        do_set_lights("running power")
+        do_set_lights(['running',  'power'])
     else if (ship == 'sailor')
-        do_set_lights("running")
+        do_set_lights(['running'])
     else if (ship == 'power-50m')
-        do_set_lights("running power power-50m")
+        do_set_lights(['running', 'power', 'power-50m'])
     else if (ship == 'fisher')
-        toggle_lights('fisher')
+        toggle_light('fisher')
     else if (ship == 'trawler')
-        toggle_lights('trawler')
-    else if (ship == 'no-commmand')
-        do_set_lights('running no-command')
-    else if (ship == 'restr-man')
-        toggle_lights('restr-man')
+        toggle_light('trawler')
+    else if (ship == 'draft')
+        toggle_light('draft')
+    else if (ship == 'pilot')
+        toggle_light('pilot')
     else if (ship == 'tugboat')
-        toggle_lights('tugboat');
-    loadShip('ship-sb.html');
+        toggle_light('tugboat')
+    else if (ship == 'no-command')
+        do_set_lights(['running', 'no-command'])
+    else if (ship == 'restr-man')
+        toggle_light('restr-man')
+    else if (ship == 'tugboat')
+        toggle_light('tugboat');
 }
 
 
