@@ -1,0 +1,36 @@
+/*
+    Copyright (c) Alec Leamas 2017
+
+    Distributed under the GNU Public license, version 2 or any
+    more recent of the GPL.
+*/
+
+#ship {
+    z-index: 1;
+    display: inline-block;
+    position: relative;
+}
+
+#running {
+    display: none;
+    z-index: 3;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+#power, #power-50m {
+    display: none;
+    z-index: 4;
+    position: absolute;
+    top: 10px;
+    left: 7px;
+}
+
+#no-command, #restr-man, #draft, #fisher, #trawler, #pilot {
+    display: none;
+    z-index: 5;
+    position: absolute;
+    top: 0px;
+    left: 7px;
+}

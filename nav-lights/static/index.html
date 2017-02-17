@@ -1,0 +1,48 @@
+<!doctype html>
+<!--
+    Copyright (c) Alec Leamas 2017
+
+    Distributed under the GNU Public license, version 2 or any
+    more recent of the GPL.
+
+-->
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="menu.css"/>
+    <script src="menu.js"></script>
+  </head>
+  <body bgcolor="black" onload="onBodyLoad();" >
+    <div class="tab">
+      <div class="tablinks">
+        <div id="dd-all">
+          <img src="../images/menu.png" id="menuTab" />
+          <div class="dropdown" >
+            <div class="dropdown-content">
+              <a href="#" onclick="set_lights('running')">Running</a>
+              <a href="#" onclick="set_lights('power')">Power</a>
+              <a href="#" onclick="set_lights('power-50m')">Power > 50m</a>
+              <a href="#" onclick="set_lights('fishing')">Fishing</a>
+              <a href="#" onclick="set_lights('trawler')">Trawler</a>
+              <a href="#" onclick="set_lights('no-command')">Not under command</a>
+              <a href="#" onclick="set_lights('restr-man')">
+                  Restricted manoeuverability
+              </a>
+              <a href="#" onclick="set_lights('draft')">Constrained by draft</a>
+              <a href="#" onclick="set_lights('pilot')">Pilot</a>
+              <a href="api.html">Learning view</a>
+            </div>
+          </div>
+          <a href="javvascript:void(0)" class="tablinks" onclick="return false;">Bow</a>
+          <a href="javascript:void(0)" class="tablinks" onclick="return false;">SB</a>
+          <a href="javascript:void(0)" class="tablinks" onclick="return false;">Stern</a>
+          <a href="javascript:void(0)" class="tablinks" onclick="return false;">Port</a>
+        </div>
+      </div>
+    </div>
+    <div class="iframes">
+      <iframe src="ship-sb.html" id="shipFrame" name="shipFrame"></iframe>
+    </div>
+  </body>
+</html>

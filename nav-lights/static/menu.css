@@ -1,0 +1,91 @@
+/*
+    Copyright (c) Alec Leamas 2017
+
+    Distributed under the GNU Public license, version 2 or any
+    more recent of the GPL.
+*/
+body {
+    padding: 0;
+    margin: 0;
+}
+
+
+div.tab {
+    overflow: hidden;
+    background-color: #686868;
+    color: white;
+}
+
+div.tab a, div.tab img {
+    float: left;
+    display: block;
+    color: white;
+    text-decoration: none;
+    transition: 0.3s;
+    padding: 1em 1em 1em 1em;
+    height: 1.0em;
+    outline-style: none;
+}
+
+div.tab a:hover {
+    background-color: #424242;
+}
+
+div.tab a:focus, .active {
+    background-color: black;
+}
+
+.tabcontent {
+    display: none;
+    padding: 0.5em 1em;
+}
+
+.tablinks {
+    border-radius: 0.6em 0.6em 0 0;
+}
+
+#dd-all:hover  .dropdown {
+    display: block;
+}
+
+.dropdown {
+    position: absolute;
+    top: 3em;
+    height: 100%
+    overflow: auto;
+    z-index: 1;
+    padding-top: 1em;
+    max-width: 11em;
+    background-color: #686868;
+    display: none;
+}
+
+.dropdown-content a, .dropdown-content hr {
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    display: block;
+    background-color: #686868;
+    color: white;
+    text-decoration: none;
+    outline-style: none;
+    text-align: left;
+}
+
+.dropdown a:hover {
+    background-color: #424242;
+}
+
+.iframes {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+#shipFrame {
+    display: block;
+    float: right;
+    right: 0;
+    bottom: 0;
+    height:100%;
+    width: 100%;
+}
