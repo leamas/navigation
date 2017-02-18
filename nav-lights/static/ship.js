@@ -24,13 +24,13 @@ function getParameterByName(name) {
 }
 
 function handleLightParameter(param) {
+    var elem = document.getElementById(param);
+    if (elem == null)
+        return;
     if (getParameterByName(param) == null)
-        return null;
-    var style = document.getElementById(param).style;
-    if (style != null)
-        style.display = 'block';
+        elem.style.display = 'none';
     else
-        console.log("No such element to display: " + param);
+        elem.style.display = 'block';
 }
 
 
@@ -41,5 +41,6 @@ function onBodyLoad() {
     ];
     for (var i = 0; i < lights.length; i += 1)
         handleLightParameter(lights[i]);
+    console.log("foo");
 }
 

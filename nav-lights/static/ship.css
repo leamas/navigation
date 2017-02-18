@@ -28,7 +28,7 @@
     right: 7px;
 }
 
-#no-command, #restr-man, #draft, #fisher, #trawler, #pilot {
+#no-command, #restr-man, #draft, #fisher, #trawler, #pilot, #tugboat {
     display: none;
     z-index: 5;
     position: absolute;

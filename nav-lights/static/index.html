@@ -25,11 +25,12 @@
             <a href="#" onclick="set_lights('power-50m')">
                 Power > <u>5</u>0m
             </a>
-            <a href="#" onclick="set_lights('fisher')"><u>F</u>ishing</a>
-            <a href="#" onclick="set_lights('trawler')"><u>T</u>rawler</a>
             <a href="#" onclick="set_lights('no-command')">
                 Not under <u>C</u>ommand
             </a>
+            <hr />
+            <a href="#" onclick="set_lights('fisher')"><u>F</u>ishing</a>
+            <a href="#" onclick="set_lights('trawler')"><u>T</u>rawler</a>
             <a href="#" onclick="set_lights('restr-man')">
                 <u>R</u>estricted Manoeuverability
             </a>
@@ -42,14 +43,15 @@
             <a href="api.html">Learning view</a>
           </div>
         </div>
-        <a href="javvascript:void(0)" class="tablinks" onclick="return false;">Bow</a>
-        <a href="javascript:void(0)" class="tablinks" onclick="return false;">SB</a>
-        <a href="javascript:void(0)" class="tablinks" onclick="return false;">Stern</a>
-        <a href="javascript:void(0)" class="tablinks" onclick="return false;">Port</a>
+        <a href="javvascript:void(0)" id="ship-bow" class="tablinks" onclick="selectView(event, 'ship-bow')">Bow</a>
+        <a href="javascript:void(0)" id="ship-sb" class="tablinks" onclick="selectView(event, 'ship-sb')">SB</a>
+        <a href="javascript:void(0)" id="ship-stern" class="tablinks" onclick="selectView(event, 'ship-stern')">Stern</a>
+        <a href="javascript:void(0)" id="ship-port" class="tablinks" onclick="selectView(event, 'ship-port')">Port</a>
       </div>
     </div>
     <div class="iframes">
-      <iframe src="ship-sb.html?running=1" id="shipFrame" name="shipFrame"></iframe>
+      <iframe src="ship-sb.html" id="shipFrame" name="shipFrame" frameBorder="0">
+      </iframe>
     </div>
   </body>
 </html>
