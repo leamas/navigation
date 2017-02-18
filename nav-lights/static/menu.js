@@ -12,6 +12,8 @@ function loadShip(base_url, lights) {
     if (query)
         url += '?' + query;
     window.frames['shipFrame'].location = url;
+    setTimeout(function() {
+        window.frames['shipFrame'].location.reload(true); }, 10)
 }
 
 
