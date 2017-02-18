@@ -7,13 +7,13 @@
 */
 
 function loadShip(base_url, lights) {
-    var query = lights.join('&');
-    var url = base_url;
-    if (query)
-        url += '?' + query;
+    var url  = base_url +  '?timestamp=' + Date.now();
+    if (lights.length > 0)
+        url += '&' + lights.join('&');
     window.frames['shipFrame'].location = url;
-    setTimeout(function() {
-        window.frames['shipFrame'].location.reload(true); }, 10)
+    window.frames['shipFrame'].src = url;
+    //setTimeout(function() {
+    //    window.frames['shipFrame'].location.reload(true); }, 1)
 }
 
 
