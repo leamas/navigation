@@ -6,10 +6,14 @@
 
 */
 
-function loadShip(base_url, lights) {
+function loadShip(base_url, lights, bgcolor) {
     var url  = base_url +  '?timestamp=' + Date.now();
     if (lights.length > 0)
         url += '&' + lights.join('&');
+    if (bgcolor == 'rgb(2, 10, 75)')
+        url += '&dusk'
+    if (bgcolor == 'rgb(33, 33, 34)')
+        url += '&night'
     window.frames['shipFrame'].location = url;
     //window.frames['shipFrame'].src = url;
     // setTimeout(function() {
@@ -86,6 +90,14 @@ function get_lights() {
 }
 
 
+function getIframeBody() {
+    var iframe = document.getElementById('shipFrame');
+    var innerDoc = (iframe.contentDocument) ?
+        iframe.contentDocument : iframe.contentWindow.document;
+    return innerDoc.getElementsByTagName('body')[0];
+}
+
+
 function set_lights(ship) {
     if (ship == 'power')
         do_set_lights(['running',  'power'])
@@ -120,20 +132,35 @@ function onBodyLoad() {
 
 function selectView(evt, viewName) {
 
-    var tabcontent = document.getElementsByClassName("tabcontent");
-    for (var i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    function setIframeBackground(color) {
+        var body = getIframeBody();
+        body.style['background-color'] = color;
     }
+
+    var body = getIframeBody();
+    var bgcolor = body.style['background-color'] || 'black';
 
     var tablinks = document.getElementsByClassName("tablinks");
     for (var i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
+        tablinks[i].style['background-color'] = '';
     }
 
     document.getElementById(viewName).style.display = "block";
     evt.currentTarget.className += " active";
+    evt.currentTarget.style['background-color'] = bgcolor;
 
     var old_lights = get_lights()
-    loadShip(viewName + '.html', old_lights)
+    loadShip(viewName + '.html', old_lights, bgcolor)
     var new_lights = get_lights();
+    setTimeout(function() { setIframeBackground(bgcolor); }, 10);
+}
+
+
+function setNight() {
+    getIframeBody().style['background-color'] = '#212122';
+}
+
+function setDusk() {
+    getIframeBody().style['background-color'] = '#020a4b';
 }

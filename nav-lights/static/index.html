@@ -45,30 +45,47 @@
         </div>
         <a href="javascript:void(0)"
             id="ship-bow" class="tablinks"
+            title="View bow"
             onclick="selectView(event, 'ship-bow')">
                 &#8675;
         </a>
         <a href="javascript:void(0)"
             id="ship-sb" class="tablinks"
+            title="View starboard side"
             onclick="selectView(event, 'ship-sb')">
                 &#8674;
         </a>
         <a href="javascript:void(0)"
             id="ship-stern" class="tablinks"
+            title="View stern"
             onclick="selectView(event, 'ship-stern')">
                 &#8673;
         </a>
         <a href="javascript:void(0)"
             id="ship-port" class="tablinks"
+            title="View port side"
             onclick="selectView(event, 'ship-port')">
                 &#8672;
         </a>
         <a href="javascript:void(0)"
             id="ship-top" class="tablinks"
+            title="View from above"
             onclick="selectView(event, 'ship-top')">
                 &#9679;
         </a>
       </div>
+      <a href="javascript:void(0)"
+          id="dusk"
+          onclick="setDusk()"
+      >
+          <img src="../images/dusk.png" class="menuImg" />
+      </a>
+      <a href="javascript:void(0)"
+          id="night"
+          onclick="setNight()"
+      >
+          <img src="../images/night.png" class="menuImg" />
+      </a>
     </div>
     <div class="iframes">
       <iframe src="ship-sb.html" id="shipFrame" name="shipFrame" frameBorder="0">

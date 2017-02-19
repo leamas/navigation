@@ -25,8 +25,8 @@ div.tab a, div.tab img, div.tab a img{
     color: white;
     text-decoration: none;
     transition: 0.3s;
+    height: 1.5em;
     padding: 1em 1em 1em 1em;
-    height: 1.0em;
     outline-style: none;
 }
 
@@ -34,12 +34,19 @@ div.tab a:hover {
     background-color: #424242;
 }
 
+/**
 div.tab a:focus, .active {
     background-color: black;
 }
+**/
 
-.menuImg {
-    display: block;
+#dusk, #night {
+    height: 100%;
+    vertical-align: middle;
+    display: inline-block;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    float: right;
 }
 
 .tabcontent {

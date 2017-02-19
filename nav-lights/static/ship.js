@@ -33,6 +33,13 @@ function handleLightParameter(param) {
         elem.style.display = 'block';
 }
 
+function setNight() {
+    document.getElementsByTagName('body')[0].style['background-color'] = '#212122';
+}
+
+function setDusk() {
+    document.getElementsByTagName('body')[0].style['background-color'] = '#020a4b';
+}
 
 function onBodyLoad() {
     var lights = [
@@ -41,6 +48,10 @@ function onBodyLoad() {
     ];
     for (var i = 0; i < lights.length; i += 1)
         handleLightParameter(lights[i]);
+    if (getParameterByName('night') != null)
+        setNight();
+    if (getParameterByName('dusk') != null)
+        setDusk();
     console.log("foo");
 }
 
