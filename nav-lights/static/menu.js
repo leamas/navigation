@@ -32,7 +32,8 @@ function getIframeElementById(id_) {
 function clear_lights() {
     var allLights = [
         'running', 'power', 'power-50m', 'fisher', 'trawler',
-         'no-command', 'restr-man', 'draft', 'pilot', 'tugboat'
+        'no-command', 'restr-man', 'draft', 'pilot', 'tugboat',
+        'max7m-7knots'
     ];
     for (var i = 0; i < allLights.length; i += 1)
          remove_light(allLights[i]);
@@ -76,7 +77,8 @@ function do_set_lights(lights) {
 function get_lights() {
     var allLights = [
         'running', 'power', 'power-50m', 'fisher', 'trawler',
-         'no-command', 'restr-man', 'draft', 'pilot', 'tugboat'
+        'no-command', 'restr-man', 'draft', 'pilot', 'tugboat',
+        'max7m-7knots'
     ];
     var lights = [];
     for (var i = 0; i < allLights.length; i += 1) {
@@ -101,6 +103,8 @@ function getIframeBody() {
 function set_lights(ship) {
     if (ship == 'power')
         do_set_lights(['running',  'power'])
+    else if (ship == 'max7m-7knots')
+        do_set_lights(['max7m-7knots'])
     else if (ship == 'sailor')
         do_set_lights(['running'])
     else if (ship == 'power-50m')
@@ -134,7 +138,8 @@ function selectView(evt, viewName) {
 
     function setIframeBackground(color) {
         var body = getIframeBody();
-        body.style['background-color'] = color;
+        if (body)
+            body.style['background-color'] = color;
     }
 
     var body = getIframeBody();

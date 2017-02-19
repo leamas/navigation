@@ -32,7 +32,15 @@ body {
     right: 7px;
 }
 
-#no-command, #restr-man, #draft, #fisher, #trawler, #pilot, #tugboat {
+#no-command, #restr-man, #draft, #fisher, #trawler, #pilot,
+#tugboat, #max7m-7knots {
+    display: none;
+    z-index: 5;
+    position: absolute;
+    top: 0px;
+    right: 7px;
+}
+#knots {
     display: none;
     z-index: 5;
     position: absolute;
