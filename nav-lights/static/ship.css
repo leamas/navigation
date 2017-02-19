@@ -5,6 +5,10 @@
     more recent of the GPL.
 */
 
+body {
+    background-color: black
+}
+
 #ship {
     z-index: 1;
     display: inline-block;

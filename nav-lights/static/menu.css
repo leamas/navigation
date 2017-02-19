@@ -11,6 +11,7 @@ body {
 }
 
 
+
 div.tab {
     overflow: hidden;
     background-color: #686868;
@@ -18,7 +19,7 @@ div.tab {
     margin: 0 0 0 0;
 }
 
-div.tab a, div.tab img {
+div.tab a, div.tab img, div.tab a img{
     float: left;
     display: block;
     color: white;
@@ -35,6 +36,10 @@ div.tab a:hover {
 
 div.tab a:focus, .active {
     background-color: black;
+}
+
+.menuImg {
+    display: block;
 }
 
 .tabcontent {
