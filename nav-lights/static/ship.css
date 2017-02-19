@@ -40,10 +40,3 @@ body {
     top: 0px;
     right: 7px;
 }
-#knots {
-    display: none;
-    z-index: 5;
-    position: absolute;
-    top: 0px;
-    right: 7px;
-}

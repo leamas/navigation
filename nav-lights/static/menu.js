@@ -127,6 +127,29 @@ function set_lights(ship) {
         toggle_light('tugboat');
 }
 
+function accelerator(key) {
+
+    const shipByKey = {
+        '7': 'max7m-7knots',
+        'S': 'sailor',
+        'P': 'power',
+        '5': 'power-50m',
+        'C': 'no-command',
+        'R': 'restr-man',
+        'F': 'fisher',
+        'T': 'trawler',
+        'D': 'draft',
+        'I': 'pilot',
+        'U': 'tugboat'
+    }
+
+    key = key.toUpperCase();
+    if (key in shipByKey) {
+        var ship = shipByKey[key];
+        set_lights(ship);
+    }
+}
+
 
 function onBodyLoad() {
     clear_lights();
@@ -168,4 +191,8 @@ function setNight() {
 
 function setDusk() {
     getIframeBody().style['background-color'] = '#020a4b';
+}
+
+function onKeypress(e) {
+    accelerator(e.key);
 }

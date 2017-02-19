@@ -14,7 +14,7 @@
     <script src="menu.js"></script>
     <title>Navigation lights</title>
   </head>
-  <body id="pageBody" onload="onBodyLoad();">
+  <body id="pageBody" onload="onBodyLoad();" onkeypress="onKeypress(event)">
     <div class="tab">
       <div class="tablinks">
         <div id="dd-menu">
@@ -40,39 +40,37 @@
             </a>
             <a href="#" onclick="set_lights('pilot')">P<u>i</u>lot</a>
             <a href="#" onclick="set_lights('tugboat')">T<u>u</u>gboat</a>
-            <hr />
-            <a href="api.html">Learning view</a>
           </div>
         </div>
         <a href="javascript:void(0)"
             id="ship-bow" class="tablinks"
             title="View bow"
             onclick="selectView(event, 'ship-bow')">
-                &#8675;
+                <font size=5>&#8675;</font>
         </a>
         <a href="javascript:void(0)"
             id="ship-sb" class="tablinks"
             title="View starboard side"
             onclick="selectView(event, 'ship-sb')">
-                &#8674;
+                <font size=5>&#8674;</font>
         </a>
         <a href="javascript:void(0)"
             id="ship-stern" class="tablinks"
             title="View stern"
             onclick="selectView(event, 'ship-stern')">
-                &#8673;
+                <font size=5>&#8673;</font>
         </a>
         <a href="javascript:void(0)"
             id="ship-port" class="tablinks"
             title="View port side"
             onclick="selectView(event, 'ship-port')">
-                &#8672;
+            <font size=5>&#8672;</font>
         </a>
         <a href="javascript:void(0)"
             id="ship-top" class="tablinks"
             title="View from above"
             onclick="selectView(event, 'ship-top')">
-                &#9679;
+                <font size=5>&#9679;</font>
         </a>
       </div>
       <a href="javascript:void(0)"
