@@ -1,12 +1,18 @@
 function onBodyLoad() {
 
+    /** Waypoint image. */
     const MARKER_SRC = "../images/marker.png";
 
-    /** Width in pixels of waypoint marker. */
+    /** Width in pixels of waypoint image. */
     const MARKER_WIDTH = 12;
 
+    /** Max length of click to not be a pull (ms). */
+    const CLICK_THRESHOLD = 200;
+
     /** List of all user-defined waypoints. */
-    waypoints = [];
+    var waypoints = [];
+
+    var currentWaypoint = -1;
 
 
     /** Distance in pixels between p1 and p2. */
@@ -75,20 +81,57 @@ function onBodyLoad() {
         return false;
     }
 
-    /** DOM mouse click event handler: add or remove a waypoint. */
-    function onClick(e) {
-        if (e.button != 0)
-            return;
+    /** Return index in waypoints to an element "close" to p or -1. */
+    function findNearbyWaypoint(p, canvas) {
+        for (var i = 0; i < waypoints.length; i += 1) {
+            if (distance(waypoints[i], p) <  MARKER_WIDTH)
+                return i;
+        }
+        return -1;
+    }
+
+    /** Mouse click: add or remove a waypoint. */
+    function click(e) {
         var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
         if (checkRemove(p, canvas))
             return;
         waypoints.push(p);
-        drawMarker(p, canvas)
-        drawLines(canvas);
+        redraw(canvas);
     }
 
-    window.addEventListener('click', onClick);
+    /** DOM mousedown event: initiate currentWaypoint and mousedownAt. */
+    function onMousedown(e) {
+        if (e.buttons != 1)
+            return;
+        var canvas = document.getElementById('mapCanvas');
+        var p = getMousePos(e, canvas);
+        currentWaypoint = findNearbyWaypoint(p, canvas);
+        mousedownAt = Date.now()
+    }
+
+    /** DOM mouseup event: possibly fire a click() */
+    function onMouseup(e) {
+        if (Date.now() - mousedownAt < CLICK_THRESHOLD)
+            click(e);
+        currentWaypoint = -1;
+    }
+
+    /** DOM mousemove event: possibly drag current waypoint. */
+    function onMousemove(e) {
+        if (e.buttons != 1 || currentWaypoint == -1)
+            return;
+        var canvas = document.getElementById('mapCanvas');
+        var p = getMousePos(e, canvas);
+        waypoints[currentWaypoint].x = p.x;
+        waypoints[currentWaypoint].y = p.y;
+        redraw(canvas);
+    }
+
+
+    window.addEventListener('mousedown', onMousedown);
+    window.addEventListener('mouseup', onMouseup);
+    window.addEventListener('mousemove', onMousemove);
     var canvas = document.getElementById('mapCanvas');
     if (!canvas.getContext)
         return;
