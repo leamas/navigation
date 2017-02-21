@@ -1,18 +1,22 @@
 function onBodyLoad() {
 
-    /** Waypoint image. */
-    const MARKER_SRC = "../images/marker.png";
+    const TRIANGLE_SRC = "../images/triangle.png";
+    const RULER_SRC = "../images/ruler.png";
+
+    const TRIANGLE_WIDTH = 807;
+    const TRIANGLE_HEIGHT = 407;
+    const RULER_WIDTH = 1160;
+    const RULER_HEIGHT = 69;
 
     /** Width in pixels of waypoint image. */
-    const MARKER_WIDTH = 12;
+    const HANDLE_WIDTH = 12;
 
     /** Max length of click to not be a pull (ms). */
     const CLICK_THRESHOLD = 200;
 
     /** List of all user-defined waypoints. */
-    var waypoints = [];
-
-    var currentWaypoint = -1;
+    var triangle = {'x': 4500, 'y': 3000};
+    var ruler = {'x': 3750, 'y': 3000};
 
 
     /** Distance in pixels between p1 and p2. */
@@ -90,6 +94,25 @@ function onBodyLoad() {
         return -1;
     }
 
+    function drawRuler(p) {
+        var canvas = document.getElementById('mapCanvas');
+        var ctx = canvas.getContext('2d')
+        var image = new Image();
+        image.src = RULER_SRC;
+        //ctx.drawImage(image, p.x - RULER_WIDTH/2, p.y - RULER_HEIGHT/2);
+        ctx.drawImage(image,  500, 500);
+    }
+
+    function drawTriangle(p) {
+        var canvas = document.getElementById('mapCanvas');
+        var ctx = canvas.getContext('2d')
+        var image = new Image();
+        image.src = TRIANGLE_SRC;
+        //ctx.drawImage(image, p.x - RULER_WIDTH/2, p.y - RULER_HEIGHT/2);
+        ctx.drawImage(image,  500, 1000);
+    }
+
+
     /** Mouse click: add or remove a waypoint. */
     function click(e) {
         var canvas = document.getElementById('mapCanvas');
@@ -104,10 +127,14 @@ function onBodyLoad() {
     function onMousedown(e) {
         if (e.buttons != 1)
             return;
-        var canvas = document.getElementById('mapCanvas');
+drawRuler(triangle, ctx);
+drawTriangle(triangle, ctx);
+
+/***
         var p = getMousePos(e, canvas);
         currentWaypoint = findNearbyWaypoint(p, canvas);
         mousedownAt = Date.now()
+**/
     }
 
     /** DOM mouseup event: possibly fire a click() */
@@ -128,8 +155,8 @@ function onBodyLoad() {
         redraw(canvas);
     }
 
-/***
     window.addEventListener('mousedown', onMousedown);
+/***
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
 ***/
@@ -141,5 +168,10 @@ function onBodyLoad() {
     image.src = MAP_SOURCE;
     image.onload = function () {
         ctx.drawImage(image, 0, 0);
+    }
+    var image2 = new Image();
+    image2.src = RULER_SRC;
+    image2.onload = function () {
+        ctx.drawImage(image, triangle.x, triangle.y);
     }
 }
