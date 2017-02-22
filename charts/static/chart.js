@@ -3,20 +3,20 @@ function onBodyLoad() {
     const TRIANGLE_SRC = "../images/triangle.png";
     const RULER_SRC = "../images/ruler.png";
 
-    const TRIANGLE_WIDTH = 807;
-    const TRIANGLE_HEIGHT = 407;
-    const RULER_WIDTH = 1160;
-    const RULER_HEIGHT = 69;
+    const TRIANGLE_WIDTH = 1614;
+    const TRIANGLE_HEIGHT = 814;
+    const RULER_WIDTH = 2320;
+    const RULER_HEIGHT = 138;
 
-    /** Width in pixels of waypoint image. */
-    const HANDLE_WIDTH = 12;
+    const HANDLE_WIDTH = 100;
 
     /** Max length of click to not be a pull (ms). */
     const CLICK_THRESHOLD = 200;
 
     /** List of all user-defined waypoints. */
-    var triangle = {'x': 1000, 'y': 800};
-    var ruler = {'x': 1000, 'y': 500};
+    var triangle = {'x': 2225, 'y': 1300};
+    var ruler = {'x': 2225, 'y': 500};
+    var currentTool = null;
 
 
     /** Distance in pixels between p1 and p2. */
@@ -65,9 +65,8 @@ function onBodyLoad() {
         var image = new Image();
         image.src = MAP_SOURCE;
         ctx.drawImage(image, 0, 0);
-        for (var i = 0; i < waypoints.length; i += 1)
-            drawMarker(waypoints[i], canvas);
-        drawLines(canvas);
+        drawRuler(ruler);
+        drawTriangle(triangle);
     }
 
     /**
@@ -86,12 +85,12 @@ function onBodyLoad() {
     }
 
     /** Return index in waypoints to an element "close" to p or -1. */
-    function findNearbyWaypoint(p, canvas) {
-        for (var i = 0; i < waypoints.length; i += 1) {
-            if (distance(waypoints[i], p) <  MARKER_WIDTH)
-                return i;
-        }
-        return -1;
+    function findNearbyTool(p, canvas) {
+        if (distance(p, triangle) < HANDLE_WIDTH)
+            return 'triangle';
+        if (distance(p, ruler) < HANDLE_WIDTH)
+            return 'ruler';
+        return null;
     }
 
     function drawRuler(p) {
@@ -107,47 +106,38 @@ function onBodyLoad() {
         var ctx = canvas.getContext('2d')
         var image = new Image();
         image.src = TRIANGLE_SRC;
-        ctx.drawImage(image, p.x - RULER_WIDTH/2, p.y - RULER_HEIGHT/2);
+        ctx.drawImage(image, p.x - TRIANGLE_WIDTH/2, p.y - TRIANGLE_HEIGHT/2);
     }
 
-
-    /** Mouse click: add or remove a waypoint. */
-    function click(e) {
-        var canvas = document.getElementById('mapCanvas');
-        var p = getMousePos(e, canvas);
-        if (checkRemove(p, canvas))
-            return;
-        waypoints.push(p);
-        redraw(canvas);
-    }
 
     /** DOM mousedown event: initiate currentWaypoint and mousedownAt. */
     function onMousedown(e) {
         if (e.buttons != 1)
             return;
-/***
+        var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
-        currentWaypoint = findNearbyWaypoint(p, canvas);
+        currentTool = findNearbyTool(p, canvas);
         mousedownAt = Date.now()
-**/
     }
 
     /** DOM mouseup event: possibly fire a click() */
     function onMouseup(e) {
-return;
-        if (Date.now() - mousedownAt < CLICK_THRESHOLD)
-            click(e);
-        currentWaypoint = -1;
+        currentTool = null;
     }
 
     /** DOM mousemove event: possibly drag current waypoint. */
     function onMousemove(e) {
-        if (e.buttons != 1 || currentWaypoint == -1)
+        if (e.buttons != 1 || currentTool == null)
             return;
         var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
-        waypoints[currentWaypoint].x = p.x;
-        waypoints[currentWaypoint].y = p.y;
+        if (currentTool == 'ruler') {
+            ruler.x = p.x
+            ruler.y = p.y
+        } else if (currentTool == 'triangle') {
+            triangle.x = p.x
+            triangle.y = p.y
+        }
         redraw(canvas);
     }
 
@@ -167,17 +157,19 @@ return;
             images[0].onload = onLoad;
             images[1].onload = onLoad;
             images[2].onload = onLoad;
-         }
+        }
+
 
         function loadImages() {
             imagesCount -= 1;
             //if (imagesCount >= 0)
             //    return;
             var canvas = document.getElementById('mapCanvas');
-            var ctx = canvas.getContext('2d')
             ctx.drawImage(images[0], 0, 0);
-            ctx.drawImage(images[1], triangle.x, triangle.y);
-            ctx.drawImage(images[2], ruler.x, ruler.y);
+            ctx.drawImage(images[1], triangle.x - TRIANGLE_WIDTH/2,
+                triangle.y - TRIANGLE_HEIGHT/2);
+            ctx.drawImage(images[2], ruler.x - RULER_WIDTH/2,
+                ruler.y - RULER_HEIGHT/2);
         }
 
         var canvas = document.getElementById('mapCanvas');
@@ -190,9 +182,7 @@ return;
 
 
     window.addEventListener('mousedown', onMousedown);
-    /***
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
-    ***/
     initiateImages();
 }
