@@ -110,6 +110,12 @@ function onBodyLoad() {
         return null;
     }
 
+    function setMoveCursor(reset = false) {
+        var elem = document.getElementById('mapCanvas');
+        elem.style.cursor = reset ? 'default' : 'move';
+    }
+
+
     /** DOM mousedown event:  */
     function onMousedown(e) {
         if (e.buttons != 1)
@@ -118,20 +124,27 @@ function onBodyLoad() {
         var p = getMousePos(e, canvas);
         currentTool = findNearbyTool(p, canvas);
         mousedownAt = Date.now()
+        if (currentTool != null)
+            setMoveCursor();
     }
 
     /** DOM mouseup event: */
     function onMouseup(e) {
+        setMoveCursor(true);
         currentTool = null;
     }
 
     /** DOM mousemove event: possibly drag current tool. */
     function onMousemove(e) {
-        if (e.buttons != 1 || currentTool == null)
-            return;
         var canvas = document.getElementById('mapCanvas');
         var ctx = canvas.getContext('2d');
         var p = getMousePos(e, canvas);
+        if (findNearbyTool(p, canvas) != null)
+            setMoveCursor()
+        else if (currentTool == null)
+            setMoveCursor(true)
+        if (e.buttons != 1 || currentTool == null)
+            return;
         if (currentTool == 'moveRuler')
             moveRuler(ctx, p)
         else if (currentTool == 'moveTriangle')
