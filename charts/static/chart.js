@@ -19,7 +19,8 @@ function onBodyLoad() {
 
     /** Angle of longest side in ruler, -PI ..PI radians, initially PI/2 */
     var rulerAngle = 0;
-    var rulerRotateHandle;
+    var rulerRotateHandleLeft;
+    var rulerRotateHandleRight
 
     /** Active tool: moveRuler, moveTriangle, rotateRuler, rotateTriangle. */
     var currentTool = null;
@@ -67,14 +68,18 @@ function onBodyLoad() {
         image.src = RULER_SRC;
     }
 
-    function getRulerRotateHandle () {
-        var pos = {
-            x: ruler.x
-                - (Math.cos(rulerAngle) * (RULER_WIDTH - HANDLE_WIDTH)/2),
-            y: ruler.y
-                - (Math.sin(rulerAngle) * (RULER_WIDTH - HANDLE_WIDTH )/2)
+    function getRulerRotateHandle (leftHandle = true) {
+        const offset = (RULER_WIDTH - HANDLE_WIDTH) / 2;
+        if (leftHandle) {
+            return {
+                x: ruler.x - (Math.cos(rulerAngle) * offset),
+                y: ruler.y - (Math.sin(rulerAngle) * offset)
+            }
         }
-        return pos;
+        return {
+                x: ruler.x + (Math.cos(rulerAngle) * offset),
+                y: ruler.y + (Math.sin(rulerAngle) * offset)
+        }
     }
 
     function drawRuler() {
@@ -105,17 +110,17 @@ function onBodyLoad() {
         clearRuler(ctx);
         ruler = p;
         drawRuler();
+        rulerRotateHandleLeft = getRulerRotateHandle();
+        rulerRotateHandleRight= getRulerRotateHandle(false);
     }
 
-    function rotateRuler(ctx, p) {
+    function rotateRuler(ctx, p, leftHandle = true) {
         clearRuler(ctx);
-        var angle = getAngle(ruler, p);
+        var angle = leftHandle ? getAngle(ruler, p) : getAngle(p, ruler);
         rulerAngle = angle;
-        console.log("Rotating, angle: " + angle + ", handle.x: " +
-            rulerRotateHandle.x + ", handle.y:" + rulerRotateHandle.y)
-        console.log("Ruler: %o", ruler);
         drawRuler();
-        rulerRotateHandle = getRulerRotateHandle();
+        rulerRotateHandleLeft = getRulerRotateHandle();
+        rulerRotateHandleRight= getRulerRotateHandle(false);
     }
 
     function initTriangle() {
@@ -156,8 +161,10 @@ function onBodyLoad() {
             return 'moveTriangle';
         if (distance(p, ruler) < HANDLE_WIDTH)
             return 'moveRuler';
-        if (distance(p, rulerRotateHandle) < HANDLE_WIDTH)
-            return 'rotateRuler';
+        if (distance(p, rulerRotateHandleLeft) < HANDLE_WIDTH)
+            return 'rotateRulerLeft';
+        if (distance(p, rulerRotateHandleRight) < HANDLE_WIDTH)
+            return 'rotateRulerRight';
         return null;
     }
 
@@ -172,7 +179,6 @@ function onBodyLoad() {
     function onMousedown(e) {
         if (e.buttons != 1)
             return;
-var pos = rulerRotateHandle;
         var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
         currentTool = findNearbyTool(p, canvas);
@@ -202,14 +208,18 @@ var pos = rulerRotateHandle;
             moveRuler(ctx, p)
         else if (currentTool == 'moveTriangle')
             moveTriangle(ctx, p);
-        else if (currentTool == 'rotateRuler')
+        else if (currentTool == 'rotateRulerLeft')
             rotateRuler(ctx, p);
+        else if (currentTool == 'rotateRulerRight')
+            rotateRuler(ctx, p, false);
     }
 
     window.addEventListener('mousedown', onMousedown);
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
-    rulerRotateHandle = getRulerRotateHandle();
+    rulerRotateHandleLeft = getRulerRotateHandle();
+    rulerRotateHandleRight = getRulerRotateHandle(false);
+
     initTriangle();
     initRuler();
 }
