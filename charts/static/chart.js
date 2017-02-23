@@ -14,8 +14,11 @@ function onBodyLoad() {
     var ruler = {'x': 1600, 'y': 400};
     var currentTool = null;
 
+    var triangleImg;
+    var triangleCanvas;
+    var rulerCanvas;
 
-    /** Distance in pixels between p1 and p2. */
+    /** Distance in pixels  p1 and p2. */
     function distance(p1, p2) {
         var deltaX = p1.x - p2.x;
         var deltaY = p1.y - p2.y;
@@ -38,40 +41,33 @@ function onBodyLoad() {
     function drawRuler() {
         var mapCanvas = document.getElementById('mapCanvas');
         var mapCtx = mapCanvas.getContext('2d');
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
-        canvas.width =  RULER_WIDTH;
-        canvas.height = RULER_HEIGHT;
-        var image = new Image();
-        image.onload = function () {
-            ctx.drawImage(image, 0, 0);
-            mapCtx.drawImage(canvas, ruler.x - RULER_WIDTH/2,
+        mapCtx.drawImage(rulerCanvas, ruler.x - RULER_WIDTH/2,
                 ruler.y - RULER_HEIGHT/2);
-        }
-        image.src = RULER_SRC;
     }
 
     function drawTriangle() {
         var mapCanvas = document.getElementById('mapCanvas');
         var mapCtx = mapCanvas.getContext('2d');
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
-        canvas.width =  TRIANGLE_WIDTH;
-        canvas.height = TRIANGLE_WIDTH;
-        var image = new Image();
-        image.onload = function () {
-            ctx.drawImage(image, 0, 0)
-            mapCtx.drawImage(canvas, triangle.x - TRIANGLE_WIDTH/2,
-                triangle.y - TRIANGLE_HEIGHT/2);
-        }
-        image.src = TRIANGLE_SRC;
+        mapCtx.drawImage(triangleCanvas,
+                         triangle.x - TRIANGLE_WIDTH/2,
+                         triangle.y - TRIANGLE_HEIGHT/2);
+    }
+
+    function clearRuler(ctx) {
+        ctx.clearRect(ruler.x - RULER_WIDTH/2,
+                  ruler.y - RULER_HEIGHT/2,
+                  RULER_WIDTH,
+                  RULER_HEIGHT);
+    }
+
+    function clearTriangle(ctx) {
+        ctx.clearRect(triangle.x - TRIANGLE_WIDTH/2,
+                  triangle.y - TRIANGLE_HEIGHT/2,
+                  TRIANGLE_WIDTH,
+                  TRIANGLE_HEIGHT);
     }
 
     /** Redraw ruler and triangle. */
-    function redraw(canvas) {
-        drawRuler();
-        drawTriangle();
-    }
 
     function findNearbyTool(p, canvas) {
         if (distance(p, triangle) < HANDLE_WIDTH)
@@ -104,31 +100,44 @@ function onBodyLoad() {
         var ctx = canvas.getContext('2d');
         var p = getMousePos(e, canvas);
         if (currentTool == 'ruler') {
-            ctx.clearRect(ruler.x - RULER_WIDTH/2,
-                          ruler.y - RULER_HEIGHT/2,
-                          RULER_WIDTH,
-                          RULER_HEIGHT);
-            ruler.x = p.x
-            ruler.y = p.y
+            clearRuler(ctx);
+            ruler = p;
+            drawRuler();
         } else if (currentTool == 'triangle') {
-            ctx.clearRect(ruler.x - TRIANGLE_WIDTH/2,
-                          ruler.y - TRIANGLE_HEIGHT/2,
-                          TRIANGLE_WIDTH,
-                          TRIANGLE_HEIGHT);
-            triangle.x = p.x
-            triangle.y = p.y
+            clearTriangle(ctx);
+            triangle = p;
+            drawTriangle();
         }
-
-        redraw(canvas);
     }
 
     function initiateImages() {
 
-        var canvas = document.getElementById('mapCanvas');
-        if (!canvas.getContext)
+        var mapCanvas = document.getElementById('mapCanvas');
+        if (!mapCanvas.getContext)
             return;
+
+        triangleCanvas = document.createElement('canvas');
+        triangleCanvas.width = TRIANGLE_WIDTH;
+        triangleCanvas.height = TRIANGLE_WIDTH;
+        var triangleImage = new Image();
+        triangleImage.onload = function () {
+            var ctx = triangleCanvas.getContext('2d');
+            ctx.drawImage(triangleImage, 0, 0)
+            drawTriangle();
+        }
+        triangleImage.src = TRIANGLE_SRC;
         drawTriangle();
-        drawRuler();
+
+        rulerCanvas = document.createElement('canvas');
+        rulerCanvas.width = RULER_WIDTH;
+        rulerCanvas.height = RULER_WIDTH;
+        var rulerImage = new Image();
+        rulerImage.onload = function () {
+            var ctx = rulerCanvas.getContext('2d');
+            ctx.drawImage(rulerImage, 0, 0)
+            drawRuler();
+        }
+        rulerImage.src = RULER_SRC;
     }
 
     window.addEventListener('mousedown', onMousedown);
