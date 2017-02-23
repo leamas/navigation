@@ -10,9 +10,18 @@ function onBodyLoad() {
 
     const HANDLE_WIDTH = 100;
 
+    /** Current triangle center position. */
     var triangle = {'x': 1600, 'y': 1000};
+    var triangleAngle = 0;
+
+    /** Current ruler center position. */
     var ruler = {'x': 1600, 'y': 400};
 
+    /** Angle of longest side in ruler, -PI ..PI radians, initially PI/2 */
+    var rulerAngle = 0;
+    var rulerRotateHandle;
+
+    /** Active tool: moveRuler, moveTriangle, rotateRuler, rotateTriangle. */
     var currentTool = null;
     var triangleCanvas;
     var rulerCanvas;
@@ -22,6 +31,14 @@ function onBodyLoad() {
         var deltaX = p1.x - p2.x;
         var deltaY = p1.y - p2.y;
         return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    }
+
+    /** Angle in radians for line from p1 to p2. */
+    function getAngle(p1, p2) {
+        var dy = p1.y - p2.y;
+        var dx = p1.x - p2.x;
+        var angle = Math.atan2(dy, dx);
+        return angle;
     }
 
     /** Position relative canvas of mouse click event e.*/
@@ -50,23 +67,55 @@ function onBodyLoad() {
         image.src = RULER_SRC;
     }
 
+    function getRulerRotateHandle () {
+        var pos = {
+            x: ruler.x
+                - (Math.cos(rulerAngle) * (RULER_WIDTH - HANDLE_WIDTH)/2),
+            y: ruler.y
+                - (Math.sin(rulerAngle) * (RULER_WIDTH - HANDLE_WIDTH )/2)
+        }
+        return pos;
+    }
+
     function drawRuler() {
-        var mapCtx = document.getElementById('mapCanvas').getContext('2d');
-        mapCtx.drawImage(rulerCanvas, ruler.x - RULER_WIDTH/2,
-                ruler.y - RULER_HEIGHT/2);
+        var ctx = document.getElementById('mapCanvas').getContext('2d');
+        ctx.save();
+        ctx.translate(ruler.x, ruler.y);
+        ctx.rotate(rulerAngle);
+        ctx.translate(-ruler.x, -ruler.y);
+        ctx.drawImage(rulerCanvas,
+                      ruler.x - RULER_WIDTH/2,
+                      ruler.y - RULER_HEIGHT/2);
+        ctx.restore();
     }
 
     function clearRuler(ctx) {
+        ctx.save();
+        ctx.translate(ruler.x, ruler.y);
+        ctx.rotate(rulerAngle);
+        ctx.translate(-ruler.x, -ruler.y);
         ctx.clearRect(ruler.x - RULER_WIDTH/2,
-                  ruler.y - RULER_HEIGHT/2,
-                  RULER_WIDTH,
-                  RULER_HEIGHT);
+                      ruler.y - RULER_HEIGHT/2,
+                      RULER_WIDTH,
+                      RULER_HEIGHT);
+        ctx.restore();
     }
 
     function moveRuler(ctx, p) {
         clearRuler(ctx);
         ruler = p;
         drawRuler();
+    }
+
+    function rotateRuler(ctx, p) {
+        clearRuler(ctx);
+        var angle = getAngle(ruler, p);
+        rulerAngle = angle;
+        console.log("Rotating, angle: " + angle + ", handle.x: " +
+            rulerRotateHandle.x + ", handle.y:" + rulerRotateHandle.y)
+        console.log("Ruler: %o", ruler);
+        drawRuler();
+        rulerRotateHandle = getRulerRotateHandle();
     }
 
     function initTriangle() {
@@ -107,12 +156,15 @@ function onBodyLoad() {
             return 'moveTriangle';
         if (distance(p, ruler) < HANDLE_WIDTH)
             return 'moveRuler';
+        if (distance(p, rulerRotateHandle) < HANDLE_WIDTH)
+            return 'rotateRuler';
         return null;
     }
 
-    function setMoveCursor(reset = false) {
+
+    function setMoveCursor(active = true) {
         var elem = document.getElementById('mapCanvas');
-        elem.style.cursor = reset ? 'default' : 'move';
+        elem.style.cursor = active ? 'move' : 'default';
     }
 
 
@@ -120,6 +172,7 @@ function onBodyLoad() {
     function onMousedown(e) {
         if (e.buttons != 1)
             return;
+var pos = rulerRotateHandle;
         var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
         currentTool = findNearbyTool(p, canvas);
@@ -130,7 +183,7 @@ function onBodyLoad() {
 
     /** DOM mouseup event: */
     function onMouseup(e) {
-        setMoveCursor(true);
+        setMoveCursor(false);
         currentTool = null;
     }
 
@@ -142,18 +195,21 @@ function onBodyLoad() {
         if (findNearbyTool(p, canvas) != null)
             setMoveCursor()
         else if (currentTool == null)
-            setMoveCursor(true)
+            setMoveCursor(false)
         if (e.buttons != 1 || currentTool == null)
             return;
         if (currentTool == 'moveRuler')
             moveRuler(ctx, p)
         else if (currentTool == 'moveTriangle')
             moveTriangle(ctx, p);
+        else if (currentTool == 'rotateRuler')
+            rotateRuler(ctx, p);
     }
 
     window.addEventListener('mousedown', onMousedown);
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
+    rulerRotateHandle = getRulerRotateHandle();
     initTriangle();
     initRuler();
 }
