@@ -35,44 +35,42 @@ function onBodyLoad() {
         };
     }
 
-    function drawRuler(p, ctx) {
+    function drawRuler() {
+        var mapCanvas = document.getElementById('mapCanvas');
+        var mapCtx = mapCanvas.getContext('2d');
         var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
         canvas.width =  RULER_WIDTH;
-        canvas.height = RULER_WIDTH;
-        var rulerCtx = canvas.getContext('2d');
+        canvas.height = RULER_HEIGHT;
         var image = new Image();
         image.onload = function () {
-            rulerCtx.drawImage(image, 0, (RULER_WIDTH - RULER_HEIGHT)/2);
-            ctx.drawImage(canvas, p.x - RULER_WIDTH/2,
-                p.y - RULER_WIDTH/2);
+            ctx.drawImage(image, 0, 0);
+            mapCtx.drawImage(canvas, ruler.x - RULER_WIDTH/2,
+                ruler.y - RULER_HEIGHT/2);
         }
         image.src = RULER_SRC;
     }
 
-    function drawTriangle(p, ctx) {
+    function drawTriangle() {
+        var mapCanvas = document.getElementById('mapCanvas');
+        var mapCtx = mapCanvas.getContext('2d');
         var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
         canvas.width =  TRIANGLE_WIDTH;
         canvas.height = TRIANGLE_WIDTH;
-        var triangleCtx = canvas.getContext('2d');
         var image = new Image();
         image.onload = function () {
-            triangleCtx.drawImage(
-                image, 0, (TRIANGLE_WIDTH - TRIANGLE_HEIGHT)/2
-            )
-            ctx.drawImage(canvas, p.x - TRIANGLE_WIDTH/2,
-                p.y - TRIANGLE_WIDTH/2);
+            ctx.drawImage(image, 0, 0)
+            mapCtx.drawImage(canvas, triangle.x - TRIANGLE_WIDTH/2,
+                triangle.y - TRIANGLE_HEIGHT/2);
         }
         image.src = TRIANGLE_SRC;
     }
 
-    /** Redraw image, ruler and triangle. */
+    /** Redraw ruler and triangle. */
     function redraw(canvas) {
-        var ctx = canvas.getContext('2d')
-        var image = new Image();
-        image.src = MAP_SOURCE;
-        ctx.drawImage(image, 0, 0);
-        drawRuler(ruler, ctx);
-        drawTriangle(triangle);
+        drawRuler();
+        drawTriangle();
     }
 
     function findNearbyTool(p, canvas) {
@@ -103,45 +101,34 @@ function onBodyLoad() {
         if (e.buttons != 1 || currentTool == null)
             return;
         var canvas = document.getElementById('mapCanvas');
+        var ctx = canvas.getContext('2d');
         var p = getMousePos(e, canvas);
         if (currentTool == 'ruler') {
+            ctx.clearRect(ruler.x - RULER_WIDTH/2,
+                          ruler.y - RULER_HEIGHT/2,
+                          RULER_WIDTH,
+                          RULER_HEIGHT);
             ruler.x = p.x
             ruler.y = p.y
         } else if (currentTool == 'triangle') {
+            ctx.clearRect(ruler.x - TRIANGLE_WIDTH/2,
+                          ruler.y - TRIANGLE_HEIGHT/2,
+                          TRIANGLE_WIDTH,
+                          TRIANGLE_HEIGHT);
             triangle.x = p.x
             triangle.y = p.y
         }
+
         redraw(canvas);
     }
 
     function initiateImages() {
 
-        var mapCtx;
-
-        function setupRuler() {
-            drawRuler(ruler, mapCtx);
-        }
-
-        function setupTriangle() {
-            drawTriangle(triangle, mapCtx);
-        }
-
-        function setupMap() {
-            var mapImage = new Image()
-            mapImage.onload = function() {
-                mapCtx.drawImage(mapImage, 0, 0);
-                setupTriangle();
-                setupRuler();
-            }
-            mapImage.src = MAP_SOURCE;
-        }
-
         var canvas = document.getElementById('mapCanvas');
         if (!canvas.getContext)
             return;
-        mapCtx = canvas.getContext('2d')
-        setupMap();
-
+        drawTriangle();
+        drawRuler();
     }
 
     window.addEventListener('mousedown', onMousedown);
