@@ -16,8 +16,9 @@ function onBodyLoad() {
         width: TRIANGLE_WIDTH,
         height: TRIANGLE_HEIGHT,
         angle: 0,
-        handleLeft: null,         /** Left rotate handle x, y */
-        handleRight: null         /** Right rotate handle x, y */
+        left: null,         /** Left rotate handle x, y */
+        right: null,        /** Right rotate handle x, y */
+        top: null           /** Top 90 degrees corner. */
     };
 
     var ruler = {
@@ -26,8 +27,13 @@ function onBodyLoad() {
         width: RULER_WIDTH,
         height: RULER_HEIGHT,
         angle: 0,
-        handleLeft: null,
-        handleRight: null
+        left: null,
+        right: null,
+        middle: null,
+        ne: null,
+        se: null,
+        sw: null,
+        nw: null
     };
 
 
@@ -116,40 +122,74 @@ function onBodyLoad() {
         image.src = RULER_SRC;
     }
 
+    function rotate(cx, cy, x, y, angle) {
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+        const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
+        const ny = (cos * (y - cy)) + (sin * (x - cx)) + cy;
+        return {x: nx, y: ny};
+    }
+
+    /** Middle point on rulers's top side. */
+    function getRulerTopMiddle() {
+        return {
+            x : ruler.x + Math.sin(ruler.angle) * ruler.height/2,
+            y : ruler.y - Math.cos(ruler.angle) * ruler.height/2
+        }
+     }
+
+    /** Middle point on rulers's bottom side. */
+    function getRulerBottomMiddle() {
+        return {
+            x : ruler.x - Math.sin(ruler.angle) * ruler.height/2,
+            y : ruler.y + Math.cos(ruler.angle) * ruler.height/2
+        }
+     }
+
+
+
     /** Upate ruler's handle coordinates. */
-    function getRulerRotateHandles() {
-        const offset = (RULER_WIDTH - HANDLE_WIDTH) / 2;
-        ruler.handleLeft = {
-            x: ruler.x - (Math.cos(ruler.angle) * offset),
-            y: ruler.y - (Math.sin(ruler.angle) * offset)
-        }
-        ruler.handleRight = {
-            x: ruler.x + (Math.cos(ruler.angle) * offset),
-            y: ruler.y + (Math.sin(ruler.angle) * offset)
-        }
-    }
+    function getRulerCorners() {
+        const offset = RULER_WIDTH / 2;
+        const sin = Math.sin(ruler.angle);
+        const cos = Math.cos(ruler.angle);
+        const topMiddle = getRulerTopMiddle();
+        const bottomMiddle = getRulerBottomMiddle();
 
-    /** Upate triangle's handle coordinates. */
-    function getTriangleRotateHandles () {
-        const offset = (TRIANGLE_WIDTH - HANDLE_WIDTH) / 2;
-        const middle = getTriangleMiddle();
-        triangle.handleLeft = {
-            x: middle.x - (Math.cos(triangle.angle) * offset),
-            y: middle.y - (Math.sin(triangle.angle) * offset)
-        }
-        triangle.handleRight = {
-            x: middle.x + (Math.cos(triangle.angle) * offset),
-            y: middle.y + (Math.sin(triangle.angle) * offset)
-        }
-    }
+ruler.middle = bottomMiddle;
 
+        ruler.left = {
+            x: ruler.x - (cos * offset),
+            y: ruler.y - (sin * offset)
+        }
+        ruler.right = {
+            x: ruler.x + (cos * offset),
+            y: ruler.y + (sin * offset)
+        }
+        ruler.nw = {
+            x: topMiddle.x - (cos * ruler.width/2),
+            y: topMiddle.y - (sin * ruler.width/2)
+        }
+        ruler.ne = {
+            x: topMiddle.x + (cos * ruler.width/2),
+            y: topMiddle.y + (sin * ruler.width/2)
+        }
+        ruler.sw = {
+            x: bottomMiddle.x - (cos * ruler.width/2),
+            y: bottomMiddle.y - (sin * ruler.width/2)
+        }
+        ruler.se = {
+            x: bottomMiddle.x + (cos * ruler.width/2),
+            y: bottomMiddle.y + (sin * ruler.width/2)
+        }
+       }
     /** Move ruler to new position p.*/
     function moveRuler(ctx, p) {
         clear(ctx, ruler);
         ruler.x = p.x;
         ruler.y = p.y;
+        getRulerCorners();
         draw(ruler, rulerCanvas);
-        getRulerRotateHandles();
     }
 
     /** Rotate ruler according to new handle position. */
@@ -157,8 +197,8 @@ function onBodyLoad() {
         clear(ctx, ruler);
         var angle = leftHandle ? getAngle(ruler, p) : getAngle(p, ruler);
         ruler.angle = angle;
+        getRulerCorners();
         draw(ruler, rulerCanvas);
-        getRulerRotateHandles();
     }
 
     /** Setup the triangle. */
@@ -180,8 +220,11 @@ function onBodyLoad() {
         clear(ctx, triangle);
         triangle.x = p.x;
         triangle.y = p.y;
+        getTriangleCorners()
         draw(triangle, triangleCanvas);
-        getTriangleRotateHandles();
+        //drawCircle(ctx, triangle.left)
+        //drawCircle(ctx, triangle.right)
+        //drawCircle(ctx, triangle.top)
     }
 
     /** Middle point on triangle's longest side. */
@@ -201,23 +244,47 @@ function onBodyLoad() {
         var angle =
             leftHandle ? getAngle(middle, p) : getAngle(p, middle);
         triangle.angle = angle;
-        getTriangleRotateHandles();
+        getTriangleCorners();
         draw(triangle, triangleCanvas);
+        drawCircle(ctx, triangle.left)
+        drawCircle(ctx, triangle.right)
+        //drawCircle(ctx, triangle.top)
      }
+
+    /** Upate triangle's handle coordinates. */
+    function getTriangleCorners () {
+        const offset = TRIANGLE_WIDTH / 2;
+        const middle = getTriangleMiddle();
+        const cos = Math.cos(triangle.angle);
+        const sin = Math.sin(triangle.angle);
+
+        triangle.left = {
+            x: middle.x - (cos * offset),
+            y: middle.y - (sin * offset)
+        }
+        triangle.right = {
+            x: middle.x + (cos * offset),
+            y: middle.y + (sin * offset)
+        }
+        triangle.top = {
+            x: middle.x - (sin * triangle.height),
+            y: middle.y + (cos * triangle.height),
+        }
+    }
 
     /** Return reflecting possible handle "near" to p, or null. */
     function findNearbyTool(p, canvas) {
         if (distance(p, ruler) < HANDLE_WIDTH)
             return 'moveRuler';
-        if (distance(p, ruler.handleLeft) < HANDLE_WIDTH)
+        if (distance(p, ruler.left) < HANDLE_WIDTH)
             return 'rotateRulerLeft';
-        if (distance(p, ruler.handleRight) < HANDLE_WIDTH)
+        if (distance(p, ruler.right) < HANDLE_WIDTH)
             return 'rotateRulerRight';
         if (distance(p, triangle) < HANDLE_WIDTH)
             return 'moveTriangle';
-        if (distance(p, triangle.handleLeft) < HANDLE_WIDTH)
+        if (distance(p, triangle.left) < HANDLE_WIDTH)
             return 'rotateTriangleLeft';
-        if (distance(p, triangle.handleRight) < HANDLE_WIDTH)
+        if (distance(p, triangle.right) < HANDLE_WIDTH)
             return 'rotateTriangleRight';
         return null;
     }
@@ -273,8 +340,8 @@ function onBodyLoad() {
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
 
-    getRulerRotateHandles();
-    getTriangleRotateHandles();
+    getRulerCorners();
+    getTriangleCorners();
     initTriangle();
     initRuler();
 }
