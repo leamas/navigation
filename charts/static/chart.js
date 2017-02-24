@@ -29,7 +29,6 @@ function onBodyLoad() {
         angle: 0,
         left: null,
         right: null,
-        middle: null,
         ne: null,
         se: null,
         sw: null,
@@ -42,6 +41,72 @@ function onBodyLoad() {
 
     var triangleCanvas;
     var rulerCanvas;
+
+    /**
+     * Check if two line intersects.
+     */
+    // point object: {x:, y:}
+    // p0 & p1 form one segment, p2 & p3 form the second segment
+    // Returns true if lines segments are intercepting
+    var lineSegmentsIntersect = (function(){
+        // function as singleton so that closure can be used
+
+        var v1, v2, v3, cross, u1, u2;
+            // working variable are closed over so they do not need creation
+            // each time the function is called. This gives a significant performance boost.
+        v1 = {x : null, y : null}; // line p0, p1 as vector
+        v2 = {x : null, y : null}; // line p2, p3 as vector
+        v3 = {x : null, y : null}; // the line from p0 to p2 as vector
+
+        function lineSegmentsIntersect(p0, p1, p2, p3) {
+            v1.x = p1.x - p0.x; // line p0, p1 as vector
+            v1.y = p1.y - p0.y;
+            v2.x = p3.x - p2.x; // line p2, p3 as vector
+            v2.y = p3.y - p2.y;
+            if((cross = v1.x * v2.y - v1.y * v2.x) === 0){
+                return false // cross prod 0 if lines parallel
+            }
+            v3 = {x : p0.x - p2.x, y : p0.y - p2.y};  // the line from p0 to p2 as vector
+            u2 = (v1.x * v3.y - v1.y * v3.x) / cross; // get unit distance along line p2 p3
+            // code point B
+            if (u2 >= 0 && u2 <= 1){                   // is intercept on line p2, p3
+                u1 = (v2.x * v3.y - v2.y * v3.x) / cross; // get unit distance on line p0, p1;
+                // code point A
+                return (u1 >= 0 && u1 <= 1);           // return true if on line else false.
+                // code point A end
+            }
+            return false; // no intercept;
+            // code point B end
+        }
+        return lineSegmentsIntersect;  // return function with closure for optimisation.
+    })();
+
+    function isColliding() {
+		return lineSegmentsIntersect(
+            triangle.left, triangle.right, ruler.sw, ruler.se) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.right, ruler.nw, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.right, ruler.se, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.right, ruler.sw, ruler.nw) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.top, ruler.sw, ruler.se) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.top, ruler.nw, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.top, ruler.se, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.left, triangle.top, ruler.sw, ruler.nw) ||
+		lineSegmentsIntersect(
+            triangle.right, triangle.top, ruler.sw, ruler.se) ||
+		lineSegmentsIntersect(
+            triangle.right, triangle.top, ruler.nw, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.right, triangle.top, ruler.se, ruler.ne) ||
+		lineSegmentsIntersect(
+            triangle.right, triangle.top, ruler.sw, ruler.nw)
+    }
 
     /** Distance in pixels between p1 and p2. */
     function distance(p1, p2) {
@@ -146,8 +211,6 @@ function onBodyLoad() {
         }
      }
 
-
-
     /** Upate ruler's handle coordinates. */
     function getRulerCorners() {
         const offset = RULER_WIDTH / 2;
@@ -155,8 +218,6 @@ function onBodyLoad() {
         const cos = Math.cos(ruler.angle);
         const topMiddle = getRulerTopMiddle();
         const bottomMiddle = getRulerBottomMiddle();
-
-ruler.middle = bottomMiddle;
 
         ruler.left = {
             x: ruler.x - (cos * offset),
@@ -185,19 +246,30 @@ ruler.middle = bottomMiddle;
        }
     /** Move ruler to new position p.*/
     function moveRuler(ctx, p) {
+        const oldpos = {x: ruler.x, y: ruler.y};
         clear(ctx, ruler);
         ruler.x = p.x;
         ruler.y = p.y;
         getRulerCorners();
+        if (isColliding()) {
+            ruler.x = oldpos.x
+            ruler.y = oldpos.y
+            getRulerCorners();
+        }
         draw(ruler, rulerCanvas);
     }
 
     /** Rotate ruler according to new handle position. */
     function rotateRuler(ctx, p, leftHandle = true) {
+        const oldAngle = ruler.angle;
         clear(ctx, ruler);
-        var angle = leftHandle ? getAngle(ruler, p) : getAngle(p, ruler);
+        const angle = leftHandle ? getAngle(ruler, p) : getAngle(p, ruler);
         ruler.angle = angle;
         getRulerCorners();
+        if (isColliding()) {
+            ruler.angle = oldAngle;
+            getRulerCorners();
+        }
         draw(ruler, rulerCanvas);
     }
 
@@ -217,14 +289,17 @@ ruler.middle = bottomMiddle;
 
     /** Move triangle to new position p. */
     function moveTriangle(ctx, p) {
+        var oldpos = {x: triangle.x, y: triangle.y };
         clear(ctx, triangle);
         triangle.x = p.x;
         triangle.y = p.y;
         getTriangleCorners()
+        if (isColliding()) {
+            triangle.x = oldpos.x
+            triangle.y = oldpos.y
+            getTriangleCorners()
+        }
         draw(triangle, triangleCanvas);
-        //drawCircle(ctx, triangle.left)
-        //drawCircle(ctx, triangle.right)
-        //drawCircle(ctx, triangle.top)
     }
 
     /** Middle point on triangle's longest side. */
@@ -234,24 +309,25 @@ ruler.middle = bottomMiddle;
             x : triangle.x + Math.sin(triangle.angle) * half_y,
             y : triangle.y - Math.cos(triangle.angle) * half_y
         }
-
-     }
+    }
 
     /** Rotate triangle according to new handle position. */
     function rotateTriangle(ctx, p, leftHandle = true) {
+        const oldAngle = triangle.angle;
         clear(ctx, triangle);
         const middle = getTriangleMiddle();
         var angle =
             leftHandle ? getAngle(middle, p) : getAngle(p, middle);
         triangle.angle = angle;
         getTriangleCorners();
+        if (isColliding()) {
+            triangle.angle = oldAngle;
+            getTriangleCorners();
+        }
         draw(triangle, triangleCanvas);
-        drawCircle(ctx, triangle.left)
-        drawCircle(ctx, triangle.right)
-        //drawCircle(ctx, triangle.top)
-     }
+    }
 
-    /** Upate triangle's handle coordinates. */
+    /** Update triangle's corner coordinates. */
     function getTriangleCorners () {
         const offset = TRIANGLE_WIDTH / 2;
         const middle = getTriangleMiddle();
