@@ -12,6 +12,7 @@ function onBodyLoad() {
     var triangle = {
         x: 1600,                  /** Center x coordinate. */
         y: 1000,                  /** Center y coordinate. */
+
         width: TRIANGLE_WIDTH,
         height: TRIANGLE_HEIGHT,
         angle: 0,
@@ -193,8 +194,8 @@ function onBodyLoad() {
     function initRuler() {
         getRulerCorners();
         rulerCanvas = document.createElement('canvas');
-        rulerCanvas.width = RULER_WIDTH;
-        rulerCanvas.height = RULER_WIDTH;
+        rulerCanvas.width = ruler.width;
+        rulerCanvas.height = ruler.width;
         var image = new Image();
         image.onload = function () {
             var ctx = rulerCanvas.getContext('2d');
@@ -253,8 +254,8 @@ function onBodyLoad() {
     function initTriangle() {
         getTriangleCorners();
         triangleCanvas = document.createElement('canvas');
-        triangleCanvas.width = TRIANGLE_WIDTH;
-        triangleCanvas.height = TRIANGLE_WIDTH;
+        triangleCanvas.width = triangle.width;
+        triangleCanvas.height = triangle.width;
         var image = new Image();
         image.onload = function () {
             var ctx = triangleCanvas.getContext('2d');
@@ -277,7 +278,7 @@ function onBodyLoad() {
             getTriangleCorners()
         }
         draw(triangle, triangleCanvas);
-        // clear() clears the bounding rect which might touch the ruler, so:
+        // clear() clears the bounding rect which might damage the ruler, so:
         draw(ruler, rulerCanvas);
     }
 
@@ -299,8 +300,8 @@ function onBodyLoad() {
 
     /** Update triangle's corner coordinates. */
     function getTriangleCorners () {
-        const width = TRIANGLE_WIDTH/2;
-        const height = TRIANGLE_HEIGHT/2;
+        const width = triangle.width/2;
+        const height = triangle.height/2;
         const cos = Math.cos(triangle.angle);
         const sin = Math.sin(triangle.angle);
         const rotatedWidth = {x: cos *  width, y: sin * width};
@@ -332,8 +333,8 @@ function onBodyLoad() {
 
     /** Set the hand cursor on/off- */
     function setMoveCursor(active = true) {
-        var elem = document.getElementById('mapCanvas');
-        elem.style.cursor = active ? 'move' : 'default';
+        document.getElementById('mapCanvas').style.cursor =
+            active ? 'move' : 'default';
     }
 
     /** DOM mousedown event: possibly initiate drag- */
@@ -355,7 +356,7 @@ function onBodyLoad() {
 
     /** DOM mousemove event: possibly drag current tool. */
     var onMousemove = (function() {
-        const handlerByString = {
+        const handlerByTool = {
             'moveRuler': moveRuler,
             'moveTriangle': moveTriangle,
             'rotateRulerLeft': rotateRuler,
@@ -377,8 +378,9 @@ function onBodyLoad() {
                 setMoveCursor(false)
             if (e.buttons != 1 || currentTool == null)
                 return;
-            handlerByString[currentTool](ctx, p);
+            handlerByTool[currentTool](ctx, p);
         };
+
         return onMousemove;
     })();
 
