@@ -1,14 +1,13 @@
 function onBodyLoad() {
-
     const TRIANGLE_SRC = "../images/triangle.png";
     const RULER_SRC = "../images/ruler.png";
 
-    const TRIANGLE_WIDTH = 1614;
-    const TRIANGLE_HEIGHT = 814;
-    const RULER_WIDTH = 2320;
-    const RULER_HEIGHT = 138;
+    const TRIANGLE_WIDTH = 807;
+    const TRIANGLE_HEIGHT = 407;
+    const RULER_WIDTH = 1160;
+    const RULER_HEIGHT = 69;
 
-    const HANDLE_WIDTH = 100;
+    const HANDLE_WIDTH = 50;
 
     var triangle = {
         x: 1600,                  /** Center x coordinate. */
@@ -16,9 +15,10 @@ function onBodyLoad() {
         width: TRIANGLE_WIDTH,
         height: TRIANGLE_HEIGHT,
         angle: 0,
-        left: null,         /** Left rotate handle x, y */
-        right: null,        /** Right rotate handle x, y */
-        top: null           /** Top 90 degrees corner. */
+        left: null,               /** Left rotate handle x, y */
+        right: null,              /** Right rotate handle x, y */
+        middle: null,             /** Center point on longest side. */
+        top: null                 /** Top 90 degrees corner. */
     };
 
     var ruler = {
@@ -43,70 +43,43 @@ function onBodyLoad() {
     var rulerCanvas;
 
     /**
-     * Check if two line intersects.
+     * Check if the two lines (p0,p1) and (p2,p3) intersects where each
+     * p* item is a point. Returns true if intersect.
      */
-    // point object: {x:, y:}
-    // p0 & p1 form one segment, p2 & p3 form the second segment
-    // Returns true if lines segments are intercepting
-    var lineSegmentsIntersect = (function(){
+    var isIntersecting = (function(){
         // function as singleton so that closure can be used
 
+        // working variable are closed over so they do not need creation
+        // each time the function is called. This gives a significant
+        // performance boost.
         var v1, v2, v3, cross, u1, u2;
-            // working variable are closed over so they do not need creation
-            // each time the function is called. This gives a significant performance boost.
         v1 = {x : null, y : null}; // line p0, p1 as vector
         v2 = {x : null, y : null}; // line p2, p3 as vector
         v3 = {x : null, y : null}; // the line from p0 to p2 as vector
 
-        function lineSegmentsIntersect(p0, p1, p2, p3) {
-            v1.x = p1.x - p0.x; // line p0, p1 as vector
+        function isIntersecting(p0, p1, p2, p3) {
+            v1.x = p1.x - p0.x;
             v1.y = p1.y - p0.y;
-            v2.x = p3.x - p2.x; // line p2, p3 as vector
+            v2.x = p3.x - p2.x;
             v2.y = p3.y - p2.y;
             if((cross = v1.x * v2.y - v1.y * v2.x) === 0){
                 return false // cross prod 0 if lines parallel
             }
-            v3 = {x : p0.x - p2.x, y : p0.y - p2.y};  // the line from p0 to p2 as vector
-            u2 = (v1.x * v3.y - v1.y * v3.x) / cross; // get unit distance along line p2 p3
-            // code point B
-            if (u2 >= 0 && u2 <= 1){                   // is intercept on line p2, p3
-                u1 = (v2.x * v3.y - v2.y * v3.x) / cross; // get unit distance on line p0, p1;
-                // code point A
-                return (u1 >= 0 && u1 <= 1);           // return true if on line else false.
-                // code point A end
+            v3 = {x : p0.x - p2.x, y : p0.y - p2.y};
+            // get unit distance along line p2 p3
+            u2 = (v1.x * v3.y - v1.y * v3.x) / cross;
+            // is intercept on line p2, p3
+            if (u2 >= 0 && u2 <= 1){
+                // get unit distance on line p0, p1;
+                u1 = (v2.x * v3.y - v2.y * v3.x) / cross;
+                // return true if on line else false.
+                return (u1 >= 0 && u1 <= 1);
             }
-            return false; // no intercept;
-            // code point B end
+            return false; // no intersect;
         }
-        return lineSegmentsIntersect;  // return function with closure for optimisation.
+        // return function with closure for optimisation.
+        return isIntersecting;
     })();
-
-    function isColliding() {
-		return lineSegmentsIntersect(
-            triangle.left, triangle.right, ruler.sw, ruler.se) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.right, ruler.nw, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.right, ruler.se, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.right, ruler.sw, ruler.nw) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.top, ruler.sw, ruler.se) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.top, ruler.nw, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.top, ruler.se, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.left, triangle.top, ruler.sw, ruler.nw) ||
-		lineSegmentsIntersect(
-            triangle.right, triangle.top, ruler.sw, ruler.se) ||
-		lineSegmentsIntersect(
-            triangle.right, triangle.top, ruler.nw, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.right, triangle.top, ruler.se, ruler.ne) ||
-		lineSegmentsIntersect(
-            triangle.right, triangle.top, ruler.sw, ruler.nw)
-    }
 
     /** Distance in pixels between p1 and p2. */
     function distance(p1, p2) {
@@ -122,6 +95,23 @@ function onBodyLoad() {
         return Math.atan2(dy, dx);
     }
 
+    /** Vector addition of two points. */
+    function addPoints(p1, p2) {
+        return { x: p1.x + p2.x, y: p1.y + p2.y }
+    }
+
+    /** Vector subtract p2 from p1 */
+    function subPoints(p1, p2 ) {
+        return { x: p1.x - p2.x, y: p1.y - p2.y }
+    }
+
+    /** Vector multiply points  p1 and p2 */
+    function multPoints(p1, p2 ) {
+        return { x: p1.x * p2.x, y: p1.y * p2.y }
+    }
+
+
+
     /** Position relative canvas of mouse click event e.*/
     function getMousePos(e, canvas) {
         var rect = canvas.getBoundingClientRect();
@@ -133,6 +123,34 @@ function onBodyLoad() {
                 ((e.clientY - rect.top) / (rect.bottom - rect.top)
                     * canvas.height)
         };
+    }
+
+    /** Return true if triangle and ruler collides. */
+    function isColliding() {
+		return isIntersecting(
+            triangle.left, triangle.right, ruler.sw, ruler.se) ||
+		isIntersecting(
+            triangle.left, triangle.right, ruler.nw, ruler.ne) ||
+		isIntersecting(
+            triangle.left, triangle.right, ruler.se, ruler.ne) ||
+		isIntersecting(
+            triangle.left, triangle.right, ruler.sw, ruler.nw) ||
+		isIntersecting(
+            triangle.left, triangle.top, ruler.sw, ruler.se) ||
+		isIntersecting(
+            triangle.left, triangle.top, ruler.nw, ruler.ne) ||
+		isIntersecting(
+            triangle.left, triangle.top, ruler.se, ruler.ne) ||
+		isIntersecting(
+            triangle.left, triangle.top, ruler.sw, ruler.nw) ||
+		isIntersecting(
+            triangle.right, triangle.top, ruler.sw, ruler.se) ||
+		isIntersecting(
+            triangle.right, triangle.top, ruler.nw, ruler.ne) ||
+		isIntersecting(
+            triangle.right, triangle.top, ruler.se, ruler.ne) ||
+		isIntersecting(
+            triangle.right, triangle.top, ruler.sw, ruler.nw)
     }
 
     /*** Draw a circle (debug) */
@@ -154,9 +172,7 @@ function onBodyLoad() {
         ctx.translate(obj.x, obj.y);
         ctx.rotate(obj.angle);
         ctx.translate(-obj.x, -obj.y);
-        ctx.drawImage(canvas,
-                      obj.x - obj.width/2,
-                      obj.y - obj.height/2);
+        ctx.drawImage(canvas, obj.x - obj.width/2, obj.y - obj.height/2);
         ctx.restore();
     }
 
@@ -175,6 +191,7 @@ function onBodyLoad() {
 
     /** Setup the ruler object. */
     function initRuler() {
+        getRulerCorners();
         rulerCanvas = document.createElement('canvas');
         rulerCanvas.width = RULER_WIDTH;
         rulerCanvas.height = RULER_WIDTH;
@@ -187,63 +204,22 @@ function onBodyLoad() {
         image.src = RULER_SRC;
     }
 
-    function rotate(cx, cy, x, y, angle) {
-        const cos = Math.cos(angle)
-        const sin = Math.sin(angle)
-        const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
-        const ny = (cos * (y - cy)) + (sin * (x - cx)) + cy;
-        return {x: nx, y: ny};
-    }
-
-    /** Middle point on rulers's top side. */
-    function getRulerTopMiddle() {
-        return {
-            x : ruler.x + Math.sin(ruler.angle) * ruler.height/2,
-            y : ruler.y - Math.cos(ruler.angle) * ruler.height/2
-        }
-     }
-
-    /** Middle point on rulers's bottom side. */
-    function getRulerBottomMiddle() {
-        return {
-            x : ruler.x - Math.sin(ruler.angle) * ruler.height/2,
-            y : ruler.y + Math.cos(ruler.angle) * ruler.height/2
-        }
-     }
-
-    /** Upate ruler's handle coordinates. */
+    /** Update ruler's corner and handle coordinates. */
     function getRulerCorners() {
-        const offset = RULER_WIDTH / 2;
         const sin = Math.sin(ruler.angle);
         const cos = Math.cos(ruler.angle);
-        const topMiddle = getRulerTopMiddle();
-        const bottomMiddle = getRulerBottomMiddle();
+        const height = { x: sin * ruler.height/2, y: cos * ruler.height/2 };
+        const heightUp = addPoints(ruler, multPoints({x: 1, y :-1}, height));
+        const heightDown = addPoints(ruler, multPoints({x: -1, y: 1}, height));
+        const width = { x: cos * ruler.width/2, y: sin * ruler.width/2 };
+        ruler.left = subPoints(ruler, width);
+        ruler.right = addPoints(ruler, width);
+        ruler.nw = subPoints(heightUp, width);
+        ruler.ne = addPoints(heightUp, width );
+        ruler.sw = subPoints(heightDown, width);
+        ruler.se = addPoints(heightDown, width);
+    }
 
-        ruler.left = {
-            x: ruler.x - (cos * offset),
-            y: ruler.y - (sin * offset)
-        }
-        ruler.right = {
-            x: ruler.x + (cos * offset),
-            y: ruler.y + (sin * offset)
-        }
-        ruler.nw = {
-            x: topMiddle.x - (cos * ruler.width/2),
-            y: topMiddle.y - (sin * ruler.width/2)
-        }
-        ruler.ne = {
-            x: topMiddle.x + (cos * ruler.width/2),
-            y: topMiddle.y + (sin * ruler.width/2)
-        }
-        ruler.sw = {
-            x: bottomMiddle.x - (cos * ruler.width/2),
-            y: bottomMiddle.y - (sin * ruler.width/2)
-        }
-        ruler.se = {
-            x: bottomMiddle.x + (cos * ruler.width/2),
-            y: bottomMiddle.y + (sin * ruler.width/2)
-        }
-       }
     /** Move ruler to new position p.*/
     function moveRuler(ctx, p) {
         const oldpos = {x: ruler.x, y: ruler.y};
@@ -273,8 +249,9 @@ function onBodyLoad() {
         draw(ruler, rulerCanvas);
     }
 
-    /** Setup the triangle. */
+    /** Setup the triangle and it's canvas. */
     function initTriangle() {
+        getTriangleCorners();
         triangleCanvas = document.createElement('canvas');
         triangleCanvas.width = TRIANGLE_WIDTH;
         triangleCanvas.height = TRIANGLE_WIDTH;
@@ -300,24 +277,16 @@ function onBodyLoad() {
             getTriangleCorners()
         }
         draw(triangle, triangleCanvas);
-    }
-
-    /** Middle point on triangle's longest side. */
-    function getTriangleMiddle() {
-        const half_y = TRIANGLE_HEIGHT/2;
-        return {
-            x : triangle.x + Math.sin(triangle.angle) * half_y,
-            y : triangle.y - Math.cos(triangle.angle) * half_y
-        }
+        // clear() clears the bounding rect which might touch the ruler, so:
+        draw(ruler, rulerCanvas);
     }
 
     /** Rotate triangle according to new handle position. */
     function rotateTriangle(ctx, p, leftHandle = true) {
         const oldAngle = triangle.angle;
         clear(ctx, triangle);
-        const middle = getTriangleMiddle();
-        var angle =
-            leftHandle ? getAngle(middle, p) : getAngle(p, middle);
+        var angle = leftHandle ?
+            getAngle(triangle.middle, p) : getAngle(p, triangle.middle);
         triangle.angle = angle;
         getTriangleCorners();
         if (isColliding()) {
@@ -325,27 +294,23 @@ function onBodyLoad() {
             getTriangleCorners();
         }
         draw(triangle, triangleCanvas);
+        draw(ruler, rulerCanvas);
     }
 
     /** Update triangle's corner coordinates. */
     function getTriangleCorners () {
-        const offset = TRIANGLE_WIDTH / 2;
-        const middle = getTriangleMiddle();
+        const width = TRIANGLE_WIDTH/2;
+        const height = TRIANGLE_HEIGHT/2;
         const cos = Math.cos(triangle.angle);
         const sin = Math.sin(triangle.angle);
+        const rotatedWidth = {x: cos *  width, y: sin * width};
+        const rotatedHeight = {x: -sin * height, y: cos * height};
 
-        triangle.left = {
-            x: middle.x - (cos * offset),
-            y: middle.y - (sin * offset)
-        }
-        triangle.right = {
-            x: middle.x + (cos * offset),
-            y: middle.y + (sin * offset)
-        }
-        triangle.top = {
-            x: middle.x - (sin * triangle.height),
-            y: middle.y + (cos * triangle.height),
-        }
+        triangle.middle =
+            addPoints(triangle, {x: sin * height, y: -cos * height} )
+        triangle.left = subPoints(triangle.middle, rotatedWidth);
+        triangle.right = addPoints(triangle.middle, rotatedWidth);
+        triangle.top = addPoints(triangle, rotatedHeight);
     }
 
     /** Return reflecting possible handle "near" to p, or null. */
@@ -389,35 +354,38 @@ function onBodyLoad() {
     }
 
     /** DOM mousemove event: possibly drag current tool. */
-    function onMousemove(e) {
+    var onMousemove = (function() {
         const handlerByString = {
             'moveRuler': moveRuler,
             'moveTriangle': moveTriangle,
             'rotateRulerLeft': rotateRuler,
-            'rotateRulerRight': function(c, p) { rotateRuler(c, p, false); },
+            'rotateRulerRight':
+                function(c, p) { rotateRuler(c, p, false); },
             'rotateTriangleLeft': rotateTriangle,
             'rotateTriangleRight':
                 function(c, p) { rotateTriangle(c, p, false); }
         }
         var canvas = document.getElementById('mapCanvas');
         var ctx = canvas.getContext('2d');
-        const p = getMousePos(e, canvas);
 
-        if (findNearbyTool(p, canvas) != null)
-            setMoveCursor()
-        else if (currentTool == null)
-            setMoveCursor(false)
-        if (e.buttons != 1 || currentTool == null)
-            return;
-        handlerByString[currentTool](ctx, p);
-    }
+        function onMousemove(e) {
+            const p = getMousePos(e, canvas);
+
+            if (findNearbyTool(p, canvas) != null)
+                setMoveCursor()
+            else if (currentTool == null)
+                setMoveCursor(false)
+            if (e.buttons != 1 || currentTool == null)
+                return;
+            handlerByString[currentTool](ctx, p);
+        };
+        return onMousemove;
+    })();
 
     window.addEventListener('mousedown', onMousedown);
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
 
-    getRulerCorners();
-    getTriangleCorners();
     initTriangle();
     initRuler();
 }
