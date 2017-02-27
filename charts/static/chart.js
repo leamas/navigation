@@ -44,6 +44,17 @@ function onBodyLoad() {
     var rulerCanvas;
 
     /**
+    * Collision data: two colliding side pair. side2 is
+    * guaranteed to be clockwise neighbour of side1.
+    */
+    var collision  = {side1: null, side2: null};
+
+    function isSameSide() {
+        return collision.side1[0] == collision.side2[0]
+            && collision.side1[1] == collision.side2[1]
+    }
+
+    /**
      * Check if the two lines (p0,p1) and (p2,p3) intersects where each
      * p* item is a point. Returns true if intersect.
      */
@@ -96,6 +107,17 @@ function onBodyLoad() {
         return Math.atan2(dy, dx);
     }
 
+    /** Angle (positive radians) p0 -> p1 measured from line/angle p2 -> p3 */
+    function getRelativeAngle(p0, p1, p2, p3) {
+        var a0 = getAngle(p0, p1)
+        var a1 = getAngle(p2, p3);
+        if (a1 < 0)
+            a1 = (2 * Math.PI) + a1;
+        if (a0 < 0)
+            a0 = 2 * Math.PI + a0;
+        return Math.abs(a0 - a1);
+    }
+
     /** Vector addition of two points. */
     function addPoints(p1, p2) {
         return { x: p1.x + p2.x, y: p1.y + p2.y }
@@ -126,32 +148,49 @@ function onBodyLoad() {
         };
     }
 
-    /** Return true if triangle and ruler collides. */
+    /** Return collision angle if triangle and ruler collides, else false */
     function isColliding() {
-		return isIntersecting(
-            triangle.left, triangle.right, ruler.sw, ruler.se) ||
-		isIntersecting(
-            triangle.left, triangle.right, ruler.nw, ruler.ne) ||
-		isIntersecting(
-            triangle.left, triangle.right, ruler.se, ruler.ne) ||
-		isIntersecting(
-            triangle.left, triangle.right, ruler.sw, ruler.nw) ||
-		isIntersecting(
-            triangle.left, triangle.top, ruler.sw, ruler.se) ||
-		isIntersecting(
-            triangle.left, triangle.top, ruler.nw, ruler.ne) ||
-		isIntersecting(
-            triangle.left, triangle.top, ruler.se, ruler.ne) ||
-		isIntersecting(
-            triangle.left, triangle.top, ruler.sw, ruler.nw) ||
-		isIntersecting(
-            triangle.right, triangle.top, ruler.sw, ruler.se) ||
-		isIntersecting(
-            triangle.right, triangle.top, ruler.nw, ruler.ne) ||
-		isIntersecting(
-            triangle.right, triangle.top, ruler.se, ruler.ne) ||
-		isIntersecting(
-            triangle.right, triangle.top, ruler.sw, ruler.nw)
+        const linesToCheck = [
+            [triangle.left, triangle.right, ruler.se, ruler.sw],
+            [triangle.left, triangle.right, ruler.sw, ruler.nw],
+            [triangle.left, triangle.right, ruler.nw, ruler.ne],
+            [triangle.left, triangle.right, ruler.ne, ruler.se],
+            [triangle.right, triangle.top, ruler.se, ruler.sw],
+            [triangle.right, triangle.top, ruler.sw, ruler.nw],
+            [triangle.right, triangle.top, ruler.nw, ruler.ne],
+            [triangle.right, triangle.top, ruler.ne, ruler.se],
+            [triangle.top, triangle.left, ruler.se, ruler.sw],
+            [triangle.top, triangle.left, ruler.sw, ruler.nw],
+            [triangle.top, triangle.left, ruler.nw, ruler.ne],
+            [triangle.top, triangle.left, ruler.ne, ruler.se],
+        ];
+
+        /** Does index i and j refer to same triangle side? */
+        function isSameSide(i, j) {
+            return linesToCheck[i][0] == linesToCheck[j][0] &&
+                linesToCheck[i][1] == linesToCheck[j][1]
+        }
+        var hits = [];
+        for (var i = 0; i < linesToCheck.length; i += 1) {
+            if (isIntersecting.apply(this, linesToCheck[i]))
+                hits.push(i);
+        }
+        if (hits.length == 0)
+            return false;
+        if (hits.length != 2) {
+            console.log("Bad # intersects in collision: " + hits.length);
+            return false;
+        }
+        if (hits[0] == 0 && hits[1] == 2) {
+            // Re-arrange left and top corner so that top follows
+            // left to fulfill that side2 is clockwise of side1.
+            hits[0] = 2;
+            hits[1] = 0;
+        }
+        collision.side1 = linesToCheck[hits[0]];
+        collision.side2 = linesToCheck[hits[1]];
+        // console.log( "Collision, hit1: " + hits[0], ", hit 2: " + hits[1]);
+        return true;
     }
 
     /*** Draw a circle (debug) */
@@ -265,6 +304,34 @@ function onBodyLoad() {
         image.src = TRIANGLE_SRC;
     }
 
+    /**
+     * Triangle corner collides in ruler side. Ignore movements straight
+     * into ruler. Other movements into ruler rotates the triangle around
+     * the colliding corner point to align with the ruler. If the angle
+     * difference is "small", triangle aligns with ruler.
+     */
+    function cornerCollideTriangle(oldpos) {
+        const s1 = collision.side1;
+        const s2 = collision.side2;
+        angle1 = getRelativeAngle(s1[0], s1[1], s1[2], s1[3])
+        angle2 = getRelativeAngle(s2[0], s2[1], s2[2], s2[3])
+        var angle = 0;
+        if (angle1 > Math.PI)
+            angle1 -= Math.PI
+        if (angle2 > Math.PI)
+            angle2 -= Math.PI
+        if (Math.abs(angle1) > Math.abs(angle2))
+            angle1 = Math.PI - angle1
+        else
+            angle2 = Math.PI - angle2
+        angle = angle1 < angle2 ? angle1 : -angle2
+        // For now: block movements:
+        triangle.x = oldpos.x
+        triangle.y = oldpos.y
+        // console.log("Corner collide, angle: " + angle/3.14 * 180);
+
+    }
+
     /** Move triangle to new position p. */
     function moveTriangle(ctx, p) {
         var oldpos = {x: triangle.x, y: triangle.y };
@@ -273,8 +340,12 @@ function onBodyLoad() {
         triangle.y = p.y;
         getTriangleCorners()
         if (isColliding()) {
-            triangle.x = oldpos.x
-            triangle.y = oldpos.y
+            if (isSameSide()) {
+                triangle.x = oldpos.x
+                triangle.y = oldpos.y
+            } else {
+                cornerCollideTriangle(oldpos);
+            }
             getTriangleCorners()
         }
         draw(triangle, triangleCanvas);
