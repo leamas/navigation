@@ -307,7 +307,6 @@ function onBodyLoad() {
         }
         image.src = TRIANGLE_SRC;
     }
-
     /**
      * Triangle corner collides in ruler side. Ignore movements straight
      * into ruler. Other movements into ruler rotates the triangle around
@@ -316,39 +315,69 @@ function onBodyLoad() {
      */
     function cornerCollideTriangle(oldpos) {
 
-        /** Check if b is between a and c i. e., a < b < c  */
-        function between(a, b, c) {
-            if (a > c) {
-                a = (a + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-                b = (b + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-            }
-            return a < b && b < c
+        /**
+         * Given two collisions, compute the smallest possible triangle
+         * rotation which aligns triangle with ruler. The collisions are
+         * supposed to cross the same ruler side, so s1[2] == s2[2] and
+         * s1[3] == s2[3]. The result is either a clockwise rotation of
+         * s1 or a counter-clockwise rotation of s2.
+         */
+        function triangleAlignAngle(s1, s2) {
+            var angle1 =
+                getRelativeAngle(s1[0], s1[1], s1[2], s1[3]) % Math.PI
+            var angle2 =
+                getRelativeAngle(s2[0], s2[1], s2[2], s2[3]) % Math.PI
+            if (Math.abs(angle1) > Math.abs(angle2))
+                angle1 = Math.PI - angle1
+            else
+                angle2 = Math.PI - angle2
+            return angle1 < angle2 ? angle1 : -angle2
         }
-        const s1 = collision.side1;
-        const s2 = collision.side2;
-        angle1 = getRelativeAngle(s1[0], s1[1], s1[2], s1[3])
-        angle2 = getRelativeAngle(s2[0], s2[1], s2[2], s2[3])
-        if (angle1 > Math.PI)
-            angle1 -= Math.PI
-        if (angle2 > Math.PI)
-            angle2 -= Math.PI
-        if (Math.abs(angle1) > Math.abs(angle2))
-            angle1 = Math.PI - angle1
-        else
-            angle2 = Math.PI - angle2
-        const angle = angle1 < angle2 ? angle1 : -angle2
-        var dragAngle = getAngle(oldpos, triangle, true)
-        var cornerAngle = getAngle(triangle, s1[1], true);
-        var cwAngle = getAngle(triangle, s1[0], true);
-        var ccwAngle = getAngle(triangle, s2[1], true);
-        //console.log("drag: " + dragAngle/3.14 * 180
-        //    +  ", cw: " + cwAngle/3.14 * 180
-        //    + ", ccw: " + ccwAngle/3.14 * 180
-        //    + ", corner: " + cornerAngle/3.14 *180);
 
-        if (between(cornerAngle, dragAngle, ccwAngle))
+       /**
+         * Given two collisions and a drag vector compute
+         * whether the triangle should be rotated around the
+         * colliding corner or just pulled away from the ruler.
+         *
+         * Returns:
+         *     - 1 for clockwise rotation, aligns s1
+         *     - 0 for pull away
+         *     - -1 for counter-clockwise rotation, aligns s2
+         */
+        function compareDrag(s1, s2, dragAngle) {
+
+            /** Given angles min, max and a check if min < a <= max */
+            function between(min, a, max) {
+                if (min > max) {
+                    min = (min + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+                    max = (max + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+                }
+                return min < a && a <= max
+            }
+
+            const cornerAngle = getAngle(triangle, s1[1], true);
+            const cwAngle = getAngle(triangle, s1[0], true);
+            const ccwAngle = getAngle(triangle, s2[1], true);
+            //console.log("drag: " + dragAngle/3.14 * 180
+            //    +  ", cw: " + cwAngle/3.14 * 180
+            //    + ", ccw: " + ccwAngle/3.14 * 180
+            //    + ", corner: " + cornerAngle/3.14 *180);
+
+            if (between(cornerAngle, dragAngle, ccwAngle))
+                return -1
+            if (between(cwAngle, dragAngle, cornerAngle))
+                return 1
+            return 0;
+        }
+
+        const alignAngle = triangleAlignAngle(collision.side1, collision.side2);
+        console.log("Align angle: " + alignAngle / 3.14 * 180);
+        const dragAngle = getAngle(oldpos, triangle, true)
+        const action =
+            compareDrag(collision.side1, collision.side2, dragAngle);
+        if (action == -1)
             alert("rotate ccw")
-        else if (between(cwAngle, dragAngle, cornerAngle))
+        else if (action == 1)
             alert("rotate cw")
         else
             alert("drag back");
