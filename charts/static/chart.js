@@ -101,10 +101,13 @@ function onBodyLoad() {
     }
 
     /** Angle in radians for line from p1 to p2. */
-    function getAngle(p1, p2) {
+    function getAngle(p1, p2, noNegatives) {
         var dy = p1.y - p2.y;
         var dx = p1.x - p2.x;
-        return Math.atan2(dy, dx);
+        var a =  Math.atan2(dy, dx);
+        if (noNegatives && a < 0)
+            a = Math.PI*2 + a;
+        return a;
     }
 
     /** Angle (positive radians) p0 -> p1 measured from line/angle p2 -> p3 */
@@ -181,11 +184,12 @@ function onBodyLoad() {
             console.log("Bad # intersects in collision: " + hits.length);
             return false;
         }
-        if (hits[0] == 0 && hits[1] == 2) {
+        if (hits[0] < 4 && hits[1] > 7) {
             // Re-arrange left and top corner so that top follows
             // left to fulfill that side2 is clockwise of side1.
-            hits[0] = 2;
-            hits[1] = 0;
+            var tmp = hits[0];
+            hits[0] = hits[1]
+            hits[1] = tmp;
         }
         collision.side1 = linesToCheck[hits[0]];
         collision.side2 = linesToCheck[hits[1]];
@@ -311,11 +315,19 @@ function onBodyLoad() {
      * difference is "small", triangle aligns with ruler.
      */
     function cornerCollideTriangle(oldpos) {
+
+        /** Check if b is between a and c i. e., a < b < c  */
+        function between(a, b, c) {
+            if (a > c) {
+                a = (a + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+                b = (b + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+            }
+            return a < b && b < c
+        }
         const s1 = collision.side1;
         const s2 = collision.side2;
         angle1 = getRelativeAngle(s1[0], s1[1], s1[2], s1[3])
         angle2 = getRelativeAngle(s2[0], s2[1], s2[2], s2[3])
-        var angle = 0;
         if (angle1 > Math.PI)
             angle1 -= Math.PI
         if (angle2 > Math.PI)
@@ -324,7 +336,23 @@ function onBodyLoad() {
             angle1 = Math.PI - angle1
         else
             angle2 = Math.PI - angle2
-        angle = angle1 < angle2 ? angle1 : -angle2
+        const angle = angle1 < angle2 ? angle1 : -angle2
+        var dragAngle = getAngle(oldpos, triangle, true)
+        var cornerAngle = getAngle(triangle, s1[1], true);
+        var cwAngle = getAngle(triangle, s1[0], true);
+        var ccwAngle = getAngle(triangle, s2[1], true);
+        //console.log("drag: " + dragAngle/3.14 * 180
+        //    +  ", cw: " + cwAngle/3.14 * 180
+        //    + ", ccw: " + ccwAngle/3.14 * 180
+        //    + ", corner: " + cornerAngle/3.14 *180);
+
+        if (between(cornerAngle, dragAngle, ccwAngle))
+            alert("rotate ccw")
+        else if (between(cwAngle, dragAngle, cornerAngle))
+            alert("rotate cw")
+        else
+            alert("drag back");
+
         // For now: block movements:
         triangle.x = oldpos.x
         triangle.y = oldpos.y
