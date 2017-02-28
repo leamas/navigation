@@ -136,8 +136,6 @@ function onBodyLoad() {
         return { x: p1.x * p2.x, y: p1.y * p2.y }
     }
 
-
-
     /** Position relative canvas of mouse click event e.*/
     function getMousePos(e, canvas) {
         var rect = canvas.getBoundingClientRect();
@@ -151,7 +149,7 @@ function onBodyLoad() {
         };
     }
 
-    /** Return collision angle if triangle and ruler collides, else false */
+    /** Check if triangle and ruler collides, updates global collision */
     function isColliding() {
         const linesToCheck = [
             [triangle.left, triangle.right, ruler.se, ruler.sw],
@@ -370,17 +368,54 @@ function onBodyLoad() {
             return 0;
         }
 
+        /**
+         * Rotate triangle around p0 to line (p0, newposition), but
+         * not beyond ruler edge defined by maxAngle.
+         */
+        function rotateCcw(oldpos, p0, maxAngle) {
+            // Get angle to use
+            const newAngle = getAngle(p0, triangle)
+            // Determine magnitude and angle for old
+            // and new center relative p0
+            const oldAngle = getAngle(p0, oldpos);
+            var rotAngle = newAngle - oldAngle;
+            rotAngle = Math.abs(rotAngle) > Math.abs(maxAngle) ?
+                maxAngle : rotAngle;
+
+            const center = subPoints(triangle, p0)
+            const length = Math.sqrt(center.x * center.x
+                                     + center.y * center.y)
+            // Compute x,y center displament when rotating around p0
+            const diff = {
+                x: length * Math.cos(rotAngle),
+                y: -length * Math.sin(rotAngle)
+            };
+            console.log("p0: ", p0)
+            console.log("diff: ", diff);
+            console.log( "Old center, x: " + triangle.x + ", y: " + triangle.y);
+            console.log("length: " + length);
+            triangle.x = p0.x + diff.x
+            triangle.y = p0.y + diff.y
+            console.log( "New center, x: " + triangle.x + ", y: " + triangle.y);
+            triangle.angle  += rotAngle;
+        }
+
         const alignAngle = triangleAlignAngle(collision.side1, collision.side2);
         console.log("Align angle: " + alignAngle / 3.14 * 180);
         const dragAngle = getAngle(oldpos, triangle, true)
         const action =
             compareDrag(collision.side1, collision.side2, dragAngle);
-        if (action == -1)
-            alert("rotate ccw")
+        if (action == -1) {
+            var a = getAngle(collision.side1[1], oldpos)
+            var b = getAngle(collision.side1[1], triangle)
+            var c = b - a;
+            var newAngle = Math.abs(c) > alignAngle ? alignAngle : c;
+            rotateCcw(oldpos, collision.side1[1], newAngle)
+        }
         else if (action == 1)
-            alert("rotate cw")
+            console.log("rotate cw")
         else
-            alert("drag back");
+            console.log("drag back");
 
         // For now: block movements:
         triangle.x = oldpos.x
