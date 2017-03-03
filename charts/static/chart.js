@@ -265,9 +265,8 @@ function onBodyLoad() {
      *    defined, distance reflects distance.
      */
     function checkAlign() {
-        function crossProducts(side1, side2) {
-        }
 
+        // Ruler four sides, first one is the topmost nw -> ne.
         function rulerSideByIndex(ix) {
             switch (ix) {
                 case 0: return {p0: ruler.nw, p1: ruler.ne};
@@ -281,6 +280,7 @@ function onBodyLoad() {
             }
         }
 
+        // Triangle three sides, first is the long one.
         function triangleSideByIndex(ix) {
             switch (ix) {
                 case 0 : return {p0: triangle.left, p1: triangle.right};
@@ -293,6 +293,7 @@ function onBodyLoad() {
             }
         }
 
+        // Cross product, 0 for parallel lines.
         function crossProduct(side1, side2) {
             const v1 = subPoints(side1.p1, side1.p0);
             const v2 = subPoints(side2.p1, side2.p0);
@@ -300,9 +301,10 @@ function onBodyLoad() {
         }
 
         function linesIntersect(l1, l2) {
-            return isIntersecting(l1.p0,  l1.p1, l2.p0, l2.p1)
+            return isIntersecting(l1.p0, l1.p1, l2.p0, l2.p1)
         }
 
+        // Distance between two lines.
         function linesDistance(l1, l2) {
             // lines are y = mx + b1, y = mx + b2
             const m = (l1.p1.y - l1.p0.y) / (l1.p1.x - l1.p0.x);
@@ -313,9 +315,6 @@ function onBodyLoad() {
             return distance
         }
 
-        if (align.triangleSide > 2)
-            console.log("WTF");
-
         if (align.distance == -1)
             // Colliding
             return;
@@ -325,12 +324,14 @@ function onBodyLoad() {
             return;
         console.log("Align: close enough")
 
-        // Find ruler long side intersecting line triangle -> ruler.
-        const cline = { p0: triangle, p1: ruler }
+        // triangle center-> ruler center line
+        const centerLine = { p0: triangle, p1: ruler }
+
+        // Find ruler long side intersecting centerLine
         var rside = null;
         for (var r = 0; r < 3; r += 2) {
             var l = rulerSideByIndex(r);
-            if (linesIntersect(cline, l)) {
+            if (linesIntersect(centerLine, l)) {
                 rside = l;
                 align.rulerSide = r;
                 break;
@@ -343,20 +344,21 @@ function onBodyLoad() {
             return;
         }
         console.log("Align: got rside:", rside)
+        // Find the triangle side intersecting centerLine
         for (var t = 0; t < 3; t += 1) {
             var l = triangleSideByIndex(t);
-            if (linesIntersect(cline, l)) {
+            if (linesIntersect(centerLine, l)) {
                 align.triangleSide = t;
                 const cross = crossProduct(rside, l);
                 if (cross < 1) {
                     align.distance = linesDistance(l, rside);
                     console.log("Using parallel triangle side: " + t
                                 + ", distance: " + align.distance)
-                    return;
                 } else {
                     console.log("Using non-parallel triangle side: " + t )
                     align.distance = -2
                 }
+                return;
             }
         }
         console.error("No intersecting triangle edge?!");
