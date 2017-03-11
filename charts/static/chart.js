@@ -637,30 +637,18 @@ function onBodyLoad() {
     function moveTriangle(ctx, p) {
         var oldpos = { x: triangle.x, y: triangle.y };
         clear(ctx, triangle);
-        if (collisions.length == 0
-            && distance(triangle, ruler) < triangle.height/2 + 100) {
-                checkAlign();
-        }
-        /**
-        if (align.distance >= 0 && align.distance < 10 )
-             p = slideTriangle(p, oldpos);
-        **/
         triangle.x = p.x;
         triangle.y = p.y;
         getTriangleCorners()
         checkCollide();
-        if (collisions.length == 2)
+        if (collisions.length == 2) {
             cornerCollideTriangle(oldpos);
+        }
+        checkCollide();
         if (collisions.length > 0) {
-            checkAlign();
-/**
-            if (collision.isSameSide)
-                alignTriangle();
-            else
-                cornerCollideTriangle(oldpos);
-**/
-//alignTriangle();
-            getTriangleCorners()
+            triangle.x = oldpos.x;
+            triangle.y = oldpos.y;
+            collisions = [];
         }
         draw(triangle, triangleCanvas);
         // clear() clears the bounding rect which might damage the ruler, so:
