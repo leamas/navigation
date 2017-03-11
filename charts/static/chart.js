@@ -227,13 +227,7 @@ function onBodyLoad() {
             [triangle.top, triangle.left, ruler.sw, ruler.nw]
         ];
 
-        /** Does index i and j refer to same triangle side? */
-        function isSameSide(i, j) {
-            return linesToCheck[i][0] == linesToCheck[j][0] &&
-                linesToCheck[i][1] == linesToCheck[j][1]
-        }
-
-        var hits = [];
+        collisions = [];
         var ix;
         for (ix = 0; ix < linesToCheck.length; ix += 1) {
             if (isIntersecting.apply(this, linesToCheck[ix])) {
@@ -242,15 +236,15 @@ function onBodyLoad() {
                 collisions.push([triangleSide, rulerSide]);
             }
         }
-        // FIXME!
-        // if (hits[0] < 4 && hits[1] > 7) {
-        //     // Re-arrange left and top corner so that top follows
-        //     // left to fulfill that side2 is clockwise of side1.
-        //     var tmp = hits[0];
-        //     hits[0] = hits[1]
-        //     hits[1] = tmp;
-        // }
-        return true;
+        if (collisions.length == 0)
+            return;
+        if (collisions[0][0] == 0 && collisions[1][0] == 2) {
+             // Re-arrange left and top corner so that top follows
+             // left to fulfill that side2 is clockwise of side1.
+             var tmp = collisions[0];
+             collisions[0] = collisions[1]
+             collisions[1] = tmp;
+        }
     }
 
     /*** Draw a circle (debug) */
@@ -463,17 +457,16 @@ function onBodyLoad() {
     function cornerCollideTriangle(oldpos) {
 
         /**
-         * Given two collisions, compute the smallest possible triangle
-         * rotation which aligns triangle with ruler. The collisions are
-         * supposed to cross the same ruler side, so s1[2] == s2[2] and
-         * s1[3] == s2[3]. The result is either a clockwise rotation of
-         * s1 or a counter-clockwise rotation of s2.
+         * Compute the smallest possible triangle rotation which aligns
+         * one of the triangle sides t1 and t2 with ruler side r1. The
+         * result is either a clockwise rotation of t1 or a counter-clockwise
+         * (negative) rotation of t2.
          */
-        function triangleAlignAngle(s1, s2) {
+        function triangleAlignAngle(t1, t2, r1) {
             var angle1 =
-                getRelativeAngle(s1[0], s1[1], s1[2], s1[3]) % Math.PI
+                getRelativeAngle(t1.p0, t1.p1, r1.p0, r1.p1) % Math.PI;
             var angle2 =
-                getRelativeAngle(s2[0], s2[1], s2[2], s2[3]) % Math.PI
+                getRelativeAngle(t2.p0, t2.p1, r1.p0, r1.p1) % Math.PI
             if (Math.abs(angle1) > Math.abs(angle2))
                 angle1 = Math.PI - angle1
             else
@@ -502,9 +495,9 @@ function onBodyLoad() {
                 return min < a && a <= max
             }
 
-            const cornerAngle = getAngle(triangle, s1[1], true);
-            const cwAngle = getAngle(triangle, s1[0], true);
-            const ccwAngle = getAngle(triangle, s2[1], true);
+            const cwAngle = getAngle(triangle, s1.p0, true);
+            const cornerAngle = getAngle(triangle, s1.p1, true);
+            const ccwAngle = getAngle(triangle, s2.p1, true);
             //console.log("drag: " + dragAngle/3.14 * 180
             //    +  ", cw: " + cwAngle/3.14 * 180
             //    + ", ccw: " + ccwAngle/3.14 * 180
@@ -548,19 +541,22 @@ function onBodyLoad() {
             triangle.angle  += rotAngle;
         }
 
-        const side1 = triangleSideByIndex(collision[0][0]);
-        const side2 = triangleSideByIndex(collision[1][0]);
-        const alignAngle = triangleAlignAngle(side1, side2);
+        if (collisions.length < 2)
+            return;
+        const side1 = triangleSideByIndex(collisions[0][0]);
+        const side2 = triangleSideByIndex(collisions[1][0]);
+        const side3 = rulerSideByIndex(collisions[0][1]);
+        const alignAngle = triangleAlignAngle(side1, side2, side3);
         console.log("Align angle: " + alignAngle / 3.14 * 180);
         const dragAngle = getAngle(oldpos, triangle, true)
         const action =
             compareDrag(side1, side2, dragAngle);
         if (action == -1) {
-            var a = getAngle(side1[1], oldpos)
-            var b = getAngle(side1[1], triangle)
+            var a = getAngle(side1.p1, oldpos)
+            var b = getAngle(side1.p1, triangle)
             var c = b - a;
             var newAngle = Math.abs(c) > alignAngle ? alignAngle : c;
-            rotateCcw(oldpos, side1[1], newAngle)
+            rotateCcw(oldpos, side1.p1, newAngle)
         }
         else if (action == 1)
             console.log("rotate cw")
@@ -653,6 +649,8 @@ function onBodyLoad() {
         triangle.y = p.y;
         getTriangleCorners()
         checkCollide();
+        if (collisions.length == 2)
+            cornerCollideTriangle(oldpos);
         if (collisions.length > 0) {
             checkAlign();
 /**
@@ -700,6 +698,7 @@ function onBodyLoad() {
             triangle.y = oldpos.y
             triangle.angle = oldAngle;
             getTriangleCorners();
+            collisions = [];
         }
         draw(triangle, triangleCanvas);
         draw(ruler, rulerCanvas);
