@@ -15,6 +15,7 @@ function loadShip(base_url, lights, bgcolor) {
     if (bgcolor == 'rgb(33, 33, 34)')
         url += '&night'
     window.frames['shipFrame'].location = url;
+    console.log("loadSHip, url: " + url);
     //window.frames['shipFrame'].src = url;
     // setTimeout(function() {
     //     window.frames['shipFrame'].location.reload(true); }, 1)
@@ -33,7 +34,7 @@ function clear_lights() {
     var allLights = [
         'running', 'power', 'power-50m', 'fisher', 'trawler',
         'no-command', 'restr-man', 'draft', 'pilot', 'tugboat',
-        'max7m-7knots'
+        'max7m-7knots', 'obstruction'
     ];
     for (var i = 0; i < allLights.length; i += 1)
          remove_light(allLights[i]);
@@ -62,8 +63,11 @@ function remove_light(light) {
 
 
 function toggle_light(light) {
+    console.log("toggling: " + light);
     var style = getIframeElementById(light).style;
+    console.log("got: " + style.display);
     style.display = style.display == 'none' ? 'block' : 'none';
+    console.log("settinng to: " + style.display);
 }
 
 
@@ -78,7 +82,7 @@ function get_lights() {
     var allLights = [
         'running', 'power', 'power-50m', 'fisher', 'trawler',
         'no-command', 'restr-man', 'draft', 'pilot', 'tugboat',
-        'max7m-7knots'
+        'max7m-7knots', 'obstruction'
     ];
     var lights = [];
     for (var i = 0; i < allLights.length; i += 1) {
@@ -123,8 +127,8 @@ function set_lights(ship) {
         do_set_lights(['running', 'no-command'])
     else if (ship == 'restr-man')
         toggle_light('restr-man')
-    else if (ship == 'tugboat')
-        toggle_light('tugboat');
+    else if (ship == 'obstruction')
+        toggle_light('obstruction');
 }
 
 function accelerator(key) {
@@ -140,7 +144,8 @@ function accelerator(key) {
         'T': 'trawler',
         'D': 'draft',
         'I': 'pilot',
-        'U': 'tugboat'
+        'U': 'tugboat',
+        'O': 'obstruction'
     }
 
     key = key.toUpperCase();

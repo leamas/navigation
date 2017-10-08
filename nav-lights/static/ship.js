@@ -45,7 +45,7 @@ function onBodyLoad() {
     var lights = [
         'running', 'power', 'power-50m', 'running', 'no-command',
         'restr-man', 'draft', 'fisher', 'trawler', 'pilot', 'tugboat',
-        'max7m-7knots'
+        'max7m-7knots', 'obstruction'
     ];
     for (var i = 0; i < lights.length; i += 1)
         handleLightParameter(lights[i]);

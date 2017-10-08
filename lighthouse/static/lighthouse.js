@@ -20,7 +20,7 @@ function blink(ms) {
 }
 
 
-function blinks(ms, count, next_func = null) {
+function blinks(ms, count, next_func) {
     for (var i = 0; i < count; i += 1) {
         setTimeout(blink, i * 2 * ms, ms);
     }
@@ -284,41 +284,61 @@ function set_location(kind, ix)
 }
 
 
+/* function to call + description for each signature. */
 command_by_id = {
-    "flash-3s": [flashing_3s, "Fl 3s"],
-    "FR": [fixed_red, "FR"],
-    "occult-5s": [occult_5s, "Oc 5s"],
-    "occult-2-5s": [occult_2_5s, "Oc(2) 5s"],
-    "iso-5s": [iso_5s, "ISO 5s"],
-    "long-flash-10s": [long_flash_10s, "L Fl 10s"],
-    "long-flash-2-20s": [long_flash_2_20s, "L Fl(2) 20s"],
-    "flash-2-6s": [flash_2_6s, "Fl(2) 6s"],
-    "quick": [quick, "Q"],
-    "quick-3-10s": [quick_3_10s, "Q(3) 10s"],
-    "quick-9-15s": [quick_9_15s, "Q(9) 15s"],
-    "quick-6-long-flash-15s":[quick_6_long_flash_15s, "Q(6) L Fl 15s"],
-    "interrupted-quick-15s": [interrupted_quick_15s, "IQ 15s"],
-    "very-quick": [very_quick, "VQ"],
-    "very-quick-3-5s": [very_quick_3_5s, "VQ(3) 5s"],
-    "very-quick-9-10s": [very_quick_9_10s, "VQ(9) 10s"],
+    "flash-3s":
+        [flashing_3s, "Fl 3s"],
+    "FR":
+        [fixed_red, "FR"],
+    "occult-5s":
+        [occult_5s, "Oc 5s"],
+    "occult-2-5s":
+        [occult_2_5s, "Oc(2) 5s"],
+    "iso-5s":
+        [iso_5s, "ISO 5s"],
+    "long-flash-10s":
+        [long_flash_10s, "L Fl 10s"],
+    "long-flash-2-20s":
+        [long_flash_2_20s, "L Fl(2) 20s"],
+    "flash-2-6s":
+        [flash_2_6s, "Fl(2) 6s"],
+    "quick":
+        [quick, "Q"],
+    "quick-3-10s":
+        [quick_3_10s, "Q(3) 10s"],
+    "quick-9-15s":
+        [quick_9_15s, "Q(9) 15s"],
+    "quick-6-long-flash-15s":
+        [quick_6_long_flash_15s, "Q(6) L Fl 15s"],
+    "interrupted-quick-15s":
+        [interrupted_quick_15s, "IQ 15s"],
+    "very-quick":
+        [very_quick, "VQ"],
+    "very-quick-3-5s":
+        [very_quick_3_5s, "VQ(3) 5s"],
+    "very-quick-9-10s":
+        [very_quick_9_10s, "VQ(9) 10s"],
     "very-quick-6-long-flash-10s":
         [very_quick_6_long_flash_10s, "VQ(6) L Fl 10s"],
-    "morse-k": [morse_k, "Mo (-.-) 10s"],
-    "alternate-white-red": [alternate_white_red, "Al W R 5s"],
-    "flash-2-2-white-green": [flash_2_2_white_green, 'Al Fl (2+2) W G 10s']
+    "morse-k":
+        [morse_k, "Mo (-.-) 10s"],
+    "alternate-white-red":
+        [alternate_white_red, "Al W R 5s"],
+    "flash-2-2-white-green":
+        [flash_2_2_white_green, 'Al Fl (2+2) W G 10s']
 }
 
 
+/* Load inner frame with proper scheme and description. */
 function loadIframe(scheme) {
     descr = command_by_id[scheme][1];
     document.getElementById('header').textContent = descr;
     url = "index.html?nolegend=1&kind=" + scheme + "&title=" + descr;
     window.frames['demoFrame'].location = url;
-
 }
 
 
-function dispatch() {
+function on_body_load() {
     hideLegend();
     var noLegend = getParameterByName('nolegend');
     if (noLegend) {

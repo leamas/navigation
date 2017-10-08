@@ -33,7 +33,7 @@ body {
 }
 
 #no-command, #restr-man, #draft, #fisher, #trawler, #pilot,
-#tugboat, #max7m-7knots {
+#tugboat, #max7m-7knots, #obstruction {
     display: none;
     z-index: 5;
     position: absolute;
