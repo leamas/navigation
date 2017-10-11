@@ -320,10 +320,11 @@ function onBodyLoad() {
         ctx.translate(obj.x, obj.y);
         ctx.rotate(obj.angle);
         ctx.translate(-obj.x, -obj.y);
-        ctx.clearRect(obj.x - obj.width/2,
-                      obj.y - obj.height/2,
-                      obj.width,
-                      obj.height);
+        // Add one pixel frame around for rounding errors.
+        ctx.clearRect(obj.x - obj.width/2 - 1,
+                      obj.y - obj.height/2 - 1,
+                      obj.width + 1,
+                      obj.height + 1);
         ctx.restore();
     }
 
@@ -835,7 +836,7 @@ function onBodyLoad() {
     })();
 
     function on_keypress(event) {
-        alert("keypress: "  + event.key);
+        //alert("keypress: "  + event.key);  FIXME
     }
 
     document.getElementById('dbgText').innerHTML = "something";
