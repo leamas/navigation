@@ -1,3 +1,7 @@
+function on_keypress(event) {
+    alert("keypress");
+}
+
 function onBodyLoad() {
     const TRIANGLE_SRC = "../images/triangle.png";
     const RULER_SRC = "../images/ruler.png";
@@ -198,13 +202,13 @@ function onBodyLoad() {
         return result;
     }
 
-    /** Angle in radians for line from p1 to p2. */
+    /** Angle in radians  between line from p1 to p2 and y == 0 line, ccw. */
     function getAngle(p1, p2, noNegatives) {
         var dy = p1.y - p2.y;
         var dx = p1.x - p2.x;
         var a =  Math.atan2(dy, dx);
         if (noNegatives && a < 0)
-            a = Math.PI*2 + a;
+            a = Math.PI * 2 + a;
         return a;
     }
 
@@ -436,9 +440,25 @@ function onBodyLoad() {
 
     /** Rotate ruler according to new handle position. */
     function rotateRuler(ctx, p, leftHandle = true) {
+        const oldpos = { x: triangle.x, y: triangle.y };
         const oldAngle = ruler.angle;
         clear(ctx, ruler);
-        const angle = leftHandle ? getAngle(ruler, p) : getAngle(p, ruler);
+
+        // Compute rotation center p0 and baseline angle diff.
+        const p0 = leftHandle ? ruler.ne : ruler.nw;
+        const baseAngle = getAngle(p0, leftHandle ? ruler.nw : ruler.ne);
+        const deltaAngle = getAngle(p0, p) - baseAngle;
+
+        // Compute coordinates relative p0 + sine/cosine.
+        const cos = Math.cos(deltaAngle)
+        const sin = Math.sin(deltaAngle)
+        var relCenter = subPoints(ruler, p0);
+
+        const angle =
+            leftHandle ? getAngle(ruler.ne, p) : getAngle(p, ruler.nw);
+
+        ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y
+        ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x
         ruler.angle = angle;
         getRulerCorners();
         checkCollide();
@@ -621,10 +641,12 @@ function onBodyLoad() {
         triangle.y += Math.sin(awayFromRuler) * distance;
     }
 
-    /** slide triangle along ruler */
+    /** Slide triangle along ruler. */
     function slideTriangle(p) {
-        console.log("Sliding triangle, drag: %o", p);
-        const dragAngle = getAngle(triangle, p, true);
+        console.log("Sliding triangle, from %d, %d", triangle.x, triangle.y);
+        console.log("Sliding triangle, drag to : %o", p);
+        const dragAngle =
+            getRelativeAngle(triangle, p, triangle.left, triangle.right);
         const facingSides = getFacingSides();
         if (facingSides.triangle == null) {
             console.log("slideTriangle: No triangle side, giving up.");
@@ -636,16 +658,22 @@ function onBodyLoad() {
             slideLeft - Math.PI : slideLeft + Math.PI;
         const pullBack = slideRight + Math.PI/2;
         const dist = distance(triangle, p);
-        if (Math.abs(dragAngle - slideLeft) < Math.PI/4) {
-            triangle.x += dist * Math.sin(slideLeft);
-            triangle.y += dist * Math.cos(slideLeft);
-        } else if (Math.abs(dragAngle - slideRight) < Math.PI/4) {
+        console.log("dragAngle: " + dragAngle / Math.PI * 180);
+        const absAngle = Math.abs(dragAngle);
+        if (absAngle < Math.PI/4) {
             triangle.x += dist * Math.sin(slideRight);
             triangle.y += dist * Math.cos(slideRight);
-        } else if (Math.abs(dragAngle - pullBack) < Math.PI/4) {
+            console.log("Sliding right");
+        } else if (absAngle <= Math.PI && absAngle > 3*Math.PI / 4) {
+            triangle.x += dist * Math.sin(slideLeft);
+            triangle.y += dist * Math.cos(slideLeft);
+            console.log("Sliding left");
+        } else if (absAngle < Math.PI) {
             triangle.x = p.x;
             triangle.y = p.y;
-        }
+            console.log("No slide, pulling back");
+        } else
+            console.log("No slide at all.");
     }
 
     /**
@@ -806,9 +834,16 @@ function onBodyLoad() {
         return onMousemove;
     })();
 
+    function on_keypress(event) {
+        alert("keypress: "  + event.key);
+    }
+
+    document.getElementById('dbgText').innerHTML = "something";
     window.addEventListener('mousedown', onMousedown);
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
+    var body = document.getElementsByTagName('body')[0];
+    body.onkeypress = on_keypress;
 
     initTriangle();
     initRuler();
