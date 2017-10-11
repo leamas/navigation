@@ -17,7 +17,20 @@
     <script src="chart.js"></script>
     <title>Sjökortsarbete 1</title>
   </head>
-  <body id="pageBody" onload="onBodyLoad()">
-    <canvas id="mapCanvas" width="2968" height="4447"></canvas>
+  <body id="pageBody" onload="onBodyLoad()" onkeypress="on_keypress(event)">
+      <p>
+          <font size="5">
+          <table border="0">
+              <tr>
+                  <td>Some more text </td>
+                  <td><div id="dbgText">nothing</div></td>
+              </tr>
+          </table>
+          </font>
+      </p>
+    <canvas
+        id="mapCanvas"
+        width="2968" height="4447" >
+    </canvas>
   </body>
 </html>
