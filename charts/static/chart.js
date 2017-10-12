@@ -432,10 +432,13 @@ function onBodyLoad() {
         getRulerCorners();
         checkCollide();
         if (collisions-length > 0) {
+            document.getElementById('collision').innerHTML = "Yes"; //FIXME
             ruler.x = oldpos.x
             ruler.y = oldpos.y
             getRulerCorners();
         }
+        else
+            document.getElementById('collision').innerHTML = "no"; //FIXME
         draw(ruler, rulerCanvas);
     }
 
@@ -464,9 +467,12 @@ function onBodyLoad() {
         getRulerCorners();
         checkCollide();
         if (collisions.length > 0) {
+            document.getElementById('collision').innerHTML = "Yes"; //FIXME
             ruler.angle = oldAngle;
             getRulerCorners();
         }
+        else
+            document.getElementById('collision').innerHTML = "no"; //FIXME
         draw(ruler, rulerCanvas);
     }
 
@@ -659,6 +665,7 @@ function onBodyLoad() {
             slideLeft - Math.PI : slideLeft + Math.PI;
         const pullBack = slideRight + Math.PI/2;
         const dist = distance(triangle, p);
+        document.getElementById('distance').innerHTML = dist; //FIXME
         console.log("dragAngle: " + dragAngle / Math.PI * 180);
         const absAngle = Math.abs(dragAngle);
         if (absAngle < Math.PI/4) {
@@ -670,8 +677,8 @@ function onBodyLoad() {
             triangle.y += dist * Math.cos(slideLeft);
             console.log("Sliding left");
         } else if (absAngle < Math.PI) {
-            triangle.x = p.x;
-            triangle.y = p.y;
+            //triangle.x = p.x;
+            //triangle.y = p.y;
             console.log("No slide, pulling back");
         } else
             console.log("No slide at all.");
@@ -689,7 +696,7 @@ function onBodyLoad() {
         checkAlign();
         if (align.distance != null
             && align.distance >= 0 && align.distance < 12) {
-                slideTriangle(p)
+                //slideTriangle(p)
         } else {
             triangle.x = p.x;
             triangle.y = p.y;
@@ -698,10 +705,12 @@ function onBodyLoad() {
             if (collisions.length == 2)
                 cornerCollideTriangle(oldpos);
             if (collisions.length > 0) {
+                document.getElementById('collision').innerHTML = "Yes"; //FIXME
                 triangle.x = oldpos.x;
                 triangle.y = oldpos.y;
                 collisions = [];
             } else {
+                document.getElementById('collision').innerHTML = "No"; //FIXME
                 checkAlign();
                 //if (align.distance >= 0 && align.distance < 12)
                 //    alignTriangle();
@@ -739,12 +748,15 @@ function onBodyLoad() {
 
         checkCollide()
         if (collisions.length > 0) {
+            document.getElementById('collision').innerHTML = "Yes"; //FIXME
             triangle.x = oldpos.x
             triangle.y = oldpos.y
             triangle.angle = oldAngle;
             getTriangleCorners();
             collisions = [];
         }
+        else
+            document.getElementById('collision').innerHTML = "No"; //FIXME
         draw(triangle, triangleCanvas);
         draw(ruler, rulerCanvas);
     }
@@ -839,7 +851,8 @@ function onBodyLoad() {
         //alert("keypress: "  + event.key);  FIXME
     }
 
-    document.getElementById('dbgText').innerHTML = "something";
+    document.getElementById('dbgText').innerHTML = "something"; //FIXME
+    document.getElementById('collision').innerHTML = "inited"; //FIXME
     window.addEventListener('mousedown', onMousedown);
     window.addEventListener('mouseup', onMouseup);
     window.addEventListener('mousemove', onMousemove);
@@ -848,4 +861,5 @@ function onBodyLoad() {
 
     initTriangle();
     initRuler();
+
 }
