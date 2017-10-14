@@ -14,8 +14,10 @@ function onBodyLoad() {
     const HANDLE_WIDTH = 50;
 
     var triangle = {
-        x: 1600,                  /** Center x coordinate. */
-        y: 1000,                  /** Center y coordinate. */
+        x: 800,                  /** Center x coordinate. */  // FIXME
+        y: 500,                  /** Center y coordinate. */  // FIXME
+//        x: 1600,                  /** Center x coordinate. */
+//        y: 1000,                  /** Center y coordinate. */
         width: TRIANGLE_WIDTH,
         height: TRIANGLE_HEIGHT,
         angle: 0,
@@ -26,8 +28,10 @@ function onBodyLoad() {
     };
 
     var ruler = {
-        'x': 1600,
-        'y': 400,
+        'x': 800,
+        'y': 200,
+//        'x': 1600,
+//        'y': 400,
         width: RULER_WIDTH,
         height: RULER_HEIGHT,
         angle: 0,
@@ -180,7 +184,7 @@ function onBodyLoad() {
         for (var r = 0; r < 3; r += 2) {
             var l = rulerSideByIndex(r);
             if (linesIntersect(centerLine, l)) {
-                result.ruler = rulerSideByIndex(r);
+                result.ruler = l;
                 break;
             }
         }
@@ -193,7 +197,7 @@ function onBodyLoad() {
         for (var t = 0; t < 3; t += 1) {
             var l = triangleSideByIndex(t);
             if (linesIntersect(centerLine, l)) {
-                result.triangle = triangleSideByIndex(t);
+                result.triangle = l;
                 break;
             }
         }
@@ -381,11 +385,11 @@ function onBodyLoad() {
                 if (cross < 1) {
                     align.distance =
                         linesDistance(facingSides.ruler, facingSides.triangle);
-                    console.log("Using parallel triangle side:, distance: "
-                                 + align.distance)
+                    document.getElementById('distance').innerHTML = align.distance; //FIXME
+                    console.log("Using parallel triangle side:");
                 } else {
                     console.log("Using non-parallel triangle side")
-                    align.distance = -2
+                    align.distance = -1;
                 }
         } else {
             console.log("checkAlign: No facing triangle or ruler long side.");
@@ -615,6 +619,9 @@ function onBodyLoad() {
     /** Align triangle to collided ruler edge. */
     function alignTriangle() {
 
+        if (align.distance == -2)
+            // We cannot align (no potential sides).
+            return;
         // Get diff between ruler and triangle angle and adjust.
         if (align.distance < 0) {
             const side1 = triangleSideByIndex(collisions[0][0]);
@@ -639,11 +646,18 @@ function onBodyLoad() {
         const cp = crossProduct(l1, l2);
         const distance = linesDistance(l1, l2);
 
-        // Get line perpendicular to ruler annd move triangle along it.
-        const rulerAngle = getAngle(l2.p0, l2.p1);
+        if (distance < 5)
+            // we are aligned!
+            return;
+
+        // Get line perpendicular to ruler and move triangle along it.
+        ///const rulerAngle = getAngle(l2.p0, l2.p1);
+        const rulerAngle = ruler.angle;
         var awayFromRuler = rulerAngle + Math.PI / 2;
         if (awayFromRuler  < 0)
             awayFromRuler += Math.PI * 2;
+        if (awayFromRuler > Math.PI * 2)
+            awayFromRuler -= Math.PI * 2;
         triangle.x += Math.cos(awayFromRuler) * distance;
         triangle.y += Math.sin(awayFromRuler) * distance;
     }
@@ -694,9 +708,9 @@ function onBodyLoad() {
         var oldpos = { x: triangle.x, y: triangle.y };
         clear(ctx, triangle);
         checkAlign();
-        if (align.distance != null
-            && align.distance >= 0 && align.distance < 12) {
+        if (align.distance != null && align.distance < 6) {
                 //slideTriangle(p)
+                alignTriangle();
         } else {
             triangle.x = p.x;
             triangle.y = p.y;
@@ -834,6 +848,9 @@ function onBodyLoad() {
 
         function onMousemove(e) {
             const p = getMousePos(e, canvas);
+            document.getElementById('x').innerHTML = p.x ;//FIXME
+            document.getElementById('y').innerHTML = p.y ;//FIXME
+
 
             if (findNearbyTool(p, canvas) != null)
                 setMoveCursor()
@@ -848,7 +865,7 @@ function onBodyLoad() {
     })();
 
     function on_keypress(event) {
-        //alert("keypress: "  + event.key);  FIXME
+        //alert("keypress: "  + event.key); // FIXME
     }
 
     document.getElementById('dbgText').innerHTML = "something"; //FIXME
