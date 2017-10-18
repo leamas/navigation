@@ -218,12 +218,8 @@ function onBodyLoad() {
 
     /** Angle (positive radians) p0 -> p1 measured from line/angle p2 -> p3 */
     function getRelativeAngle(p0, p1, p2, p3) {
-        var a0 = getAngle(p0, p1)
-        var a1 = getAngle(p2, p3);
-        if (a1 < 0)
-            a1 = (2 * Math.PI) + a1;
-        if (a0 < 0)
-            a0 = 2 * Math.PI + a0;
+        var a0 = getAngle(p0, p1, true)
+        var a1 = getAngle(p2, p3, true);
         return Math.abs(a0 - a1);
     }
 
@@ -638,11 +634,11 @@ function onBodyLoad() {
             getTriangleCorners();
         }
         const facingSides = getFacingSides();
-        if (facingSides.ruler == null)
+        if (facingSides.ruler == null || facingSides.triangle == null)
             // No facing long side, i. e. a short one:
             return;
         const l1 = facingSides.ruler;
-        const l2 = facingSides.triangle;
+        const l2 = facingSides.triangle; // BUG: l1 and/or l2 mibght be null!
         const cp = crossProduct(l1, l2);
         const distance = linesDistance(l1, l2);
 
