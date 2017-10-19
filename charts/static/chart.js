@@ -638,24 +638,32 @@ function onBodyLoad() {
             // No facing long side, i. e. a short one:
             return;
         const l1 = facingSides.ruler;
-        const l2 = facingSides.triangle; // BUG: l1 and/or l2 mibght be null!
+        const l2 = facingSides.triangle;
         const cp = crossProduct(l1, l2);
         const distance = linesDistance(l1, l2);
 
-        if (distance < 5)
+        if (Math.abs(distance) <= 2)
             // we are aligned!
             return;
 
-        // Get line perpendicular to ruler and move triangle along it.
-        ///const rulerAngle = getAngle(l2.p0, l2.p1);
-        const rulerAngle = ruler.angle;
-        var awayFromRuler = rulerAngle + Math.PI / 2;
-        if (awayFromRuler  < 0)
-            awayFromRuler += Math.PI * 2;
-        if (awayFromRuler > Math.PI * 2)
-            awayFromRuler -= Math.PI * 2;
-        triangle.x += Math.cos(awayFromRuler) * distance;
-        triangle.y += Math.sin(awayFromRuler) * distance;
+        if (Math.abs(distance) <= 5 ) {
+            // Get line perpendicular to ruler and move triangle along it.
+            console.info("Attaching triangle")
+            var toRuler = ruler.angle - Math.PI / 2;
+            if (toRuler  < 0)
+                toRuler += Math.PI * 2;
+            if (toRuler > Math.PI * 2)
+                toRuler -= Math.PI * 2;
+            var sign = 1;
+            if (isIntersecting(triangle.left, triangle.top, l1.p0, l1.p1)) {
+                sign = -1;
+            }
+            if (isIntersecting(triangle.right, triangle.top, l1.p0, l1.p1)) {
+                sign = -1;
+            }
+            triangle.x += sign * Math.cos(toRuler) * (distance - 1);
+            triangle.y += sign * Math.sin(toRuler) * (distance - 1);
+        }
     }
 
     /** Slide triangle along ruler. */
