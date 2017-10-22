@@ -100,6 +100,22 @@ function onBodyLoad() {
         }
     }
 
+
+    /**
+     * Get point where two lines on form y = ax + c and y = bx + d
+     * intersect.
+     * @see: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+     */
+    function getIntersection(a, c, b, d) {
+        if (a == b)
+            console.error("Trying to intersect parallel lines");
+        return {
+            x: (d - c) / (a - b),
+            y: (a*d - b*c) / (a - b)
+        }
+    }
+
+
     /**
      * Check if the two lines (p0,p1) and (p2,p3) intersects where each
      * p* item is a point. Returns true if intersect.
@@ -740,21 +756,22 @@ function onBodyLoad() {
     }
 
     /** Rotate triangle according to new handle position. */
-    function rotateTriangle(ctx, p, cw = true) {
+    function rotateTriangle(ctx, p, rightHandle = true) {
         const oldpos = { x: triangle.x, y: triangle.y };
         const oldAngle = triangle.angle;
         clear(ctx, triangle);
 
         // Compute rotation center p0 and baseline angle diff.
-        const p0 = cw ? triangle.right : triangle.left;
-        const baseAngle = getAngle(p0, cw ? triangle.left : triangle.right);
+        const p0 = rightHandle ? triangle.right : triangle.left;
+        const baseAngle =
+            getAngle(p0, rightHandle ? triangle.left : triangle.right);
         const deltaAngle = getAngle(p0, p) - baseAngle;
 
         // Compute coordinates relative p0 + sine/cosine.
         const cos = Math.cos(deltaAngle)
         const sin = Math.sin(deltaAngle)
-        var relCenter = subPoints(triangle, p0);
-        var relTop = subPoints(triangle.top, p0);
+        const relCenter = subPoints(triangle, p0);
+        const relTop = subPoints(triangle.top, p0);
 
         // Rotate the relative coordinates and update triangle center/angle
         triangle.top.x = p0.x + cos*relTop.x - sin*relTop.y
