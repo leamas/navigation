@@ -107,8 +107,6 @@ function onBodyLoad() {
      * @see: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
      */
     function getIntersection(a, c, b, d) {
-        console.log("getIntersection, a:", a,
-                     ", b: ",  b , ", c: ",  c, ", d: ", d)
         if (a == b)
             console.error("Trying to intersect parallel lines");
         return {
@@ -463,11 +461,14 @@ function onBodyLoad() {
     function rotateRuler(ctx, p, leftHandle = true) {
         const oldpos = { x: triangle.x, y: triangle.y };
         const oldAngle = ruler.angle;
+        const facingSides = getFacingSides();
         clear(ctx, ruler);
+        clear(ctx, triangle);
 
         // Compute rotation center p0 and baseline angle diff.
         const p0 = leftHandle ? ruler.ne : ruler.nw;
-        const baseAngle = getAngle(p0, leftHandle ? ruler.nw : ruler.ne);
+        const p1 = leftHandle ? ruler.nw : ruler.ne;
+        const baseAngle = getAngle(p0, p1);
         const deltaAngle = getAngle(p0, p) - baseAngle;
 
         // Compute coordinates relative p0 + sine/cosine.
@@ -485,12 +486,23 @@ function onBodyLoad() {
         checkCollide();
         if (collisions.length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            ruler.angle = oldAngle;
-            getRulerCorners();
+            // Find the k and l values for y = kx + l
+            // Line perpendicular to ruler from p0
+            const ruler_k = (p1.y - p0.y)/(p1.x - p0.x)
+            const ruler_l = p0.y - ruler_k * p0.x
+            // Triangle edge line
+            const t = facingSides.triangle
+            const triangle_k = (t.p1.y - t.p0.y)/(t.p1.x - t.p0.x)
+            const triangle_l = t.p0.y - triangle_k * t.p0.x;
+            // Compute intersection and use that instead.
+            const newpos =
+                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l)
+            rotateRuler(ctx, newpos, leftHandle);
         }
         else
             document.getElementById('collision').innerHTML = "no"; //FIXME
         draw(ruler, rulerCanvas);
+        draw(triangle, triangleCanvas);
     }
 
     /** Setup the triangle and it's canvas. */
@@ -791,24 +803,20 @@ function onBodyLoad() {
 
         checkCollide()
         if (collisions.length > 0) {
-            // FIXME: MOve to correct position "close to" ruler.
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
             // Find the k and l values for y = kx + l
+            // Line perpendicular to triangle from p0
             const triangle_k = (p1.y - p0.y)/(p1.x - p0.x)
             const triangle_l = p0.y - triangle_k * p0.x
-
+            // Ruler edge line from ruler.p0
             const ruler = facingSides.ruler
             const ruler_k = (ruler.p1.y - ruler.p0.y)/(ruler.p1.x - ruler.p0.x)
             const ruler_l = ruler.p0.y - ruler_k * ruler.p0.x;
-            // Find point where line perpendicular to triangle from p0
-            // and ruler edge line from ruler.p0 intersects
+
+            // Find point where the two lines intersect
             const newpos =
                 getIntersection(triangle_k, triangle_l, ruler_k, ruler_l)
-            triangle.x = newpos.x
-            triangle.y = newpos.y
-            triangle.angle = oldAngle;
-            getTriangleCorners();
-            collisions = [];
+            rotateTriangle(ctx, newpos, rightHandle);
         }
         else
             document.getElementById('collision').innerHTML = "No"; //FIXME
