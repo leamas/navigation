@@ -117,21 +117,6 @@ function onBodyLoad() {
         }
     }
 
-
-    /**
-     * Get point where two lines on form y = ax + c and y = bx + d
-     * intersect.
-     * @see: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-     */
-    function getIntersection(a, c, b, d) {
-        if (a == b)
-            console.error("Trying to intersect parallel lines");
-        return {
-            x: (d - c) / (a - b),
-            y: (a*d - b*c) / (a - b)
-        }
-    }
-
     /**
      * Check if the two lines (p0,p1) and (p2,p3) intersects where each
      * p* item is a point. Returns true if intersect.
@@ -809,8 +794,7 @@ function onBodyLoad() {
             // FIXME: MOve to correct position "close to" ruler.
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
             // Find the k and l values for y = kx + l
-            var triangle_k = (p1.y - p0.y)/(p1.x - p0.x)
-            triangle_k = -1/triangle_k  // Perpendicular.
+            const triangle_k = (p1.y - p0.y)/(p1.x - p0.x)
             const triangle_l = p0.y - triangle_k * p0.x
 
             const ruler = facingSides.ruler
@@ -819,7 +803,7 @@ function onBodyLoad() {
             // Find point where line perpendicular to triangle from p0
             // and ruler edge line from ruler.p0 intersects
             const newpos =
-                getIntersection(triangle_l, triangle_k, ruler_l, ruler_k)
+                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l)
             triangle.x = newpos.x
             triangle.y = newpos.y
             triangle.angle = oldAngle;
