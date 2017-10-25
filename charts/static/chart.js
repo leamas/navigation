@@ -116,8 +116,25 @@ function onBodyLoad() {
     }
 
     /**
+     * Get point on line l closest to point p.
+     * See: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+     */
+    function getClosestPoint(p, l) {
+        // Determine a and l in for line as y = ax + c
+        var a = l.p1.y - l.p0.y
+        a /= l.p1.x - l.p0.x
+        const c = l.p0.y - a*l.p0.x
+        // y = ax + c => ax - y + c = 0
+        const b = -1;
+        return {
+            x: (b*(b*p.x - a*p.y) - a*c) / (a*a + b*b),
+            y: (a*(-b*p.x + a*p.y) - b*c) / (a*a + b*b)
+        }
+    }
+
+    /**
      * Check if the two lines (p0,p1) and (p2,p3) intersects where each
-     * p* item is a point. Returns true if intersect.
+     * p* item is a point. Returns  true if intersect.
      */
     var isIntersecting = (function(){
         // function as singleton so that closure can be used
@@ -182,9 +199,9 @@ function onBodyLoad() {
 
 
     /**
-     * Return a {centerLine, ruler, triangle} dictionary with the line from
-     * triangle to ruler center, the triangle side facing the ruler and the
-     * ruler side facing the triangle.
+     * Return a {centerLine, ruler, triangle, rulerIx, triangleIx} dictionary
+     * with the line from * triangle to ruler center, the triangle side facing
+     * the ruler and the ruler side facing the triangle.
      */
     function getFacingSides() {
 
@@ -193,13 +210,24 @@ function onBodyLoad() {
         }
 
         const centerLine = { p0: triangle, p1: ruler }
-        var result = { centerLine: centerLine, triangle: null, ruler: null };
+        var result = {
+            centerLine: centerLine,
+            triangle: null,
+            ruler: null,
+            triangleIx: -1,
+            rulerIx: -1
+        };
+        if (triangle.x == NaN)
+            console.log("getFacingSides: x is Nan");
+        if (triangle.y == NaN)
+            console.log("getFacingSides: y is Nan");
 
         // Find ruler long side intersecting centerLine
         for (var r = 0; r < 3; r += 2) {
             var l = rulerSideByIndex(r);
             if (linesIntersect(centerLine, l)) {
                 result.ruler = l;
+                result.rulerIx = r;
                 break;
             }
         }
@@ -213,6 +241,7 @@ function onBodyLoad() {
             var l = triangleSideByIndex(t);
             if (linesIntersect(centerLine, l)) {
                 result.triangle = l;
+                result.triangleIx = t;
                 break;
             }
         }
@@ -775,7 +804,9 @@ function onBodyLoad() {
     }
 
     /** Rotate triangle according to new handle position. */
-    function rotateTriangle(ctx, p, rightHandle = true) {
+    function rotateTriangle(ctx, p, rightHandle = true, depth = 0) {
+        if (depth > 1)
+            return;
         const oldpos = { x: triangle.x, y: triangle.y };
         const oldAngle = triangle.angle;
         const facingSides = getFacingSides();
@@ -804,19 +835,9 @@ function onBodyLoad() {
         checkCollide()
         if (collisions.length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            // Find the k and l values for y = kx + l
-            // Line perpendicular to triangle from p0
-            const triangle_k = (p1.y - p0.y)/(p1.x - p0.x)
-            const triangle_l = p0.y - triangle_k * p0.x
-            // Ruler edge line from ruler.p0
-            const ruler = facingSides.ruler
-            const ruler_k = (ruler.p1.y - ruler.p0.y)/(ruler.p1.x - ruler.p0.x)
-            const ruler_l = ruler.p0.y - ruler_k * ruler.p0.x;
-
-            // Find point where the two lines intersect
-            const newpos =
-                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l)
-            rotateTriangle(ctx, newpos, rightHandle);
+            const corner = facingSides.triangleIx == 0 ? p1 : triangle.top;
+            const newpos = getClosestPoint(corner, facingSides.ruler);
+            rotateTriangle(ctx, newpos, rightHandle, depth + 1);
         }
         else
             document.getElementById('collision').innerHTML = "No"; //FIXME
