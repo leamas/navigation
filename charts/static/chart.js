@@ -836,7 +836,16 @@ function onBodyLoad() {
         if (collisions.length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
             const corner = facingSides.triangleIx == 0 ? p1 : triangle.top;
-            const newpos = getClosestPoint(corner, facingSides.ruler);
+            var newpos = getClosestPoint(corner, facingSides.ruler);
+            if (facingSides.triangleIx != 0) {
+                // The top collides into ruler.
+                const sideEdge = getAngle(newpos, p0);
+                const baseEdge = sideEdge - Math.PI/4;
+                newpos =  {
+                    x: p0.x + Math.cos(baseEdge)*TRIANGLE_WIDTH,
+                    y: p0.y + Math.sin(baseEdge)*TRIANGLE_WIDTH
+                };
+            }
             rotateTriangle(ctx, newpos, rightHandle, depth + 1);
         }
         else
