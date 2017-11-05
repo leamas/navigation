@@ -838,9 +838,13 @@ function onBodyLoad() {
             const corner = facingSides.triangleIx == 0 ? p1 : triangle.top;
             var newpos = getClosestPoint(corner, facingSides.ruler);
             if (facingSides.triangleIx != 0) {
-                // The top collides into ruler.
+                // The top collides into ruler. Either a cw rotation pulled
+                // by left handle or a ccw pulled by the right one. Compute
+                // the new p1 (handle position) by tracking back from top's
+                // collision point to right or left handle.
                 const sideEdge = getAngle(newpos, p0);
-                const baseEdge = sideEdge - Math.PI/4;
+                const baseEdge = sideEdge +
+                    (rightHandle ? Math.PI/4 : -Math.PI/4);
                 newpos =  {
                     x: p0.x + Math.cos(baseEdge)*TRIANGLE_WIDTH,
                     y: p0.y + Math.sin(baseEdge)*TRIANGLE_WIDTH
@@ -929,6 +933,8 @@ function onBodyLoad() {
             const p = getMousePos(e, canvas);
             document.getElementById('x').innerHTML = p.x ;//FIXME
             document.getElementById('y').innerHTML = p.y ;//FIXME
+            document.getElementById('angle').innerHTML =
+                getAngle(p, triangle) * 180 / Math.PI;
 
             if (findNearbyTool(p, canvas) != null)
                 setMoveCursor()
