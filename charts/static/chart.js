@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 function on_keypress(event) {
     alert("keypress");
 }
@@ -70,7 +71,7 @@ function onBodyLoad() {
     var align = {rulerSide: null, triangleSide: null, distance: null };
 
     function isSameSide() {
-        return collision[0][0] == collision[1][0]
+        return collision[0][0] == collision[1][0];
     }
 
     // Ruler four sides, first one is the topmost nw -> ne.
@@ -83,8 +84,7 @@ function onBodyLoad() {
             default:
                     console.error("Illegal ruler side: " +ix );
                     return null;
-                    break;
-        }
+	    }
     }
 
     // Triangle three sides, first is the long one.
@@ -96,7 +96,6 @@ function onBodyLoad() {
             default:
                     console.error("Illegal triangle side: " +ix );
                     return null;
-                    break;
         }
     }
 
@@ -112,7 +111,7 @@ function onBodyLoad() {
         return {
             x: (d - c) / (a - b),
             y: (a*d - b*c) / (a - b)
-        }
+        };
     }
 
     /**
@@ -121,15 +120,15 @@ function onBodyLoad() {
      */
     function getClosestPoint(p, l) {
         // Determine a and l in for line as y = ax + c
-        var a = l.p1.y - l.p0.y
-        a /= l.p1.x - l.p0.x
-        const c = l.p0.y - a*l.p0.x
-        // y = ax + c => ax - y + c = 0
+        var a = l.p1.y - l.p0.y;
+        a /= l.p1.x - l.p0.x;
+        const c = l.p0.y - a*l.p0.x;
+        // y = ax + c => ax - y + c = 0;
         const b = -1;
         return {
             x: (b*(b*p.x - a*p.y) - a*c) / (a*a + b*b),
             y: (a*(-b*p.x + a*p.y) - b*c) / (a*a + b*b)
-        }
+        };
     }
 
     /**
@@ -154,7 +153,7 @@ function onBodyLoad() {
             v2.y = p3.y - p2.y;
             cross = v1.x * v2.y - v1.y * v2.x;
             if (cross === 0) {
-                return false // cross prod 0 if lines parallel
+                return false; // cross prod 0 if lines parallel
             }
             v3 = {x : p0.x - p2.x, y : p0.y - p2.y};
             // get unit distance along line p2 p3
@@ -183,7 +182,7 @@ function onBodyLoad() {
     function crossProduct(side1, side2) {
         const v1 = subPoints(side1.p1, side1.p0);
         const v2 = subPoints(side2.p1, side2.p0);
-        return v1.x * v2.y - v1.y * v2.x
+        return v1.x * v2.y - v1.y * v2.x;
     }
 
     /** Return distance between two given lines. */
@@ -193,8 +192,8 @@ function onBodyLoad() {
         const b1 = l1.p1.y - m * l1.p1.x;
         const b2 = l2.p1.y - m * l2.p1.x;
         // https://wikipedia.org/wiki/Distance_between_two_straight_lines
-        const distance = Math.abs(b1 - b2) / Math.sqrt(m*m + 1)
-        return distance
+        const distance = Math.abs(b1 - b2) / Math.sqrt(m*m + 1);
+        return distance;
     }
 
 
@@ -206,10 +205,10 @@ function onBodyLoad() {
     function getFacingSides() {
 
         function linesIntersect(l1, l2) {
-            return isIntersecting(l1.p0, l1.p1, l2.p0, l2.p1)
+            return isIntersecting(l1.p0, l1.p1, l2.p0, l2.p1);
         }
 
-        const centerLine = { p0: triangle, p1: ruler }
+        const centerLine = { p0: triangle, p1: ruler };
         var result = {
             centerLine: centerLine,
             triangle: null,
@@ -217,9 +216,9 @@ function onBodyLoad() {
             triangleIx: -1,
             rulerIx: -1
         };
-        if (triangle.x == NaN)
+        if (isNaN(triangle.x))
             console.log("getFacingSides: x is Nan");
-        if (triangle.y == NaN)
+        if (isNaN(triangle.y))
             console.log("getFacingSides: y is Nan");
 
         // Find ruler long side intersecting centerLine
@@ -231,22 +230,22 @@ function onBodyLoad() {
                 break;
             }
         }
-        if (result.ruler == null) {
+        if (isNaN(result.ruler)) {
             // No facing long ruler edge.
-            console.log("getFacingSides: got no ruler side:")
+            console.log("getFacingSides: got no ruler side:");
         }
 //        console.log("getFacingSides: got ruler side:", result.ruler)
         // Find the triangle side intersecting centerLine
         for (var t = 0; t < 3; t += 1) {
-            var l = triangleSideByIndex(t);
-            if (linesIntersect(centerLine, l)) {
-                result.triangle = l;
+            var l1 = triangleSideByIndex(t);
+            if (linesIntersect(centerLine, l1)) {
+                result.triangle = l1;
                 result.triangleIx = t;
                 break;
             }
         }
-        if (result.triangle == null)
-            console.log("getFacingSides: got no triangle side:")
+        if (result.triangle === null)
+            console.log("getFacingSides: got no triangle side:");
         return result;
     }
 
@@ -262,24 +261,24 @@ function onBodyLoad() {
 
     /** Angle (positive radians) p0 -> p1 measured from line/angle p2 -> p3 */
     function getRelativeAngle(p0, p1, p2, p3) {
-        var a0 = getAngle(p0, p1, true)
+        var a0 = getAngle(p0, p1, true);
         var a1 = getAngle(p2, p3, true);
         return Math.abs(a0 - a1);
     }
 
     /** Vector addition of two points. */
     function addPoints(p1, p2) {
-        return { x: p1.x + p2.x, y: p1.y + p2.y }
+        return { x: p1.x + p2.x, y: p1.y + p2.y };
     }
 
     /** Vector subtract p2 from p1 */
     function subPoints(p1, p2 ) {
-        return { x: p1.x - p2.x, y: p1.y - p2.y }
+        return { x: p1.x - p2.x, y: p1.y - p2.y };
     }
 
     /** Vector multiply points  p1 and p2 */
     function multPoints(p1, p2 ) {
-        return { x: p1.x * p2.x, y: p1.y * p2.y }
+        return { x: p1.x * p2.x, y: p1.y * p2.y };
     }
 
     /** Position relative canvas of mouse click event e.*/
@@ -287,11 +286,11 @@ function onBodyLoad() {
         var rect = canvas.getBoundingClientRect();
         return {
             x: Math.floor(
-                (e.clientX - rect.left) / (rect.right - rect.left)
-                * canvas.width),
+                (e.clientX - rect.left) / (rect.right - rect.left) *
+                canvas.width),
             y: Math.floor
-                ((e.clientY - rect.top) / (rect.bottom - rect.top)
-                    * canvas.height)
+                ((e.clientY - rect.top) / (rect.bottom - rect.top) *
+                    canvas.height)
         };
     }
 
@@ -319,18 +318,18 @@ function onBodyLoad() {
         var ix;
         for (ix = 0; ix < linesToCheck.length; ix += 1) {
             if (isIntersecting.apply(this, linesToCheck[ix])) {
-                const rulerSide = Math.floor(ix % 4)
-                const triangleSide = Math.floor(ix / 4)
+                const rulerSide = Math.floor(ix % 4);
+                const triangleSide = Math.floor(ix / 4);
                 collisions.push([triangleSide, rulerSide]);
             }
         }
-        if (collisions.length == 0)
+        if (collisions.length === 0)
             return;
-        if (collisions[0][0] == 0 && collisions[1][0] == 2) {
+        if (collisions[0][0] === 0 && collisions[1][0] == 2) {
              // Re-arrange left and top corner so that top follows
              // left to fulfill that side2 is clockwise of side1.
              var tmp = collisions[0];
-             collisions[0] = collisions[1]
+             collisions[0] = collisions[1];
              collisions[1] = tmp;
         }
     }
@@ -391,11 +390,11 @@ function onBodyLoad() {
         function crossProduct(side1, side2) {
             const v1 = subPoints(side1.p1, side1.p0);
             const v2 = subPoints(side2.p1, side2.p0);
-            return v1.x * v2.y - v1.y * v2.x
+            return v1.x * v2.y - v1.y * v2.x;
         }
 
         function linesIntersect(l1, l2) {
-            return isIntersecting(l1.p0, l1.p1, l2.p0, l2.p1)
+            return isIntersecting(l1.p0, l1.p1, l2.p0, l2.p1);
         }
 
         // Distance between two lines.
@@ -405,21 +404,21 @@ function onBodyLoad() {
             const b1 = l1.p1.y - m * l1.p1.x;
             const b2 = l2.p1.y - m * l2.p1.x;
             // https://wikipedia.org/wiki/Distance_between_two_straight_lines
-            const distance = Math.abs(b1 - b2) / Math.sqrt(m*m + 1)
-            return distance
+            const distance = Math.abs(b1 - b2) / Math.sqrt(m*m + 1);
+            return distance;
         }
 
         if (distance(triangle, ruler) > triangle.height/2 + 100)
             // Too far away to align
             return;
-        console.log("Align: close enough")
+        console.log("Align: close enough");
 
         // triangle center-> ruler center line
-        const centerLine = { p0: triangle, p1: ruler }
+        const centerLine = { p0: triangle, p1: ruler };
 
         // Find ruler long side intersecting centerLine
         const facingSides = getFacingSides();
-        if (facingSides.ruler != null && facingSides.triangle != null ) {
+        if (facingSides.ruler !== null && facingSides.triangle !== null ) {
                 const cross =
                     crossProduct(facingSides.ruler, facingSides.triangle);
                 if (cross < 1) {
@@ -428,7 +427,7 @@ function onBodyLoad() {
                     document.getElementById('distance').innerHTML = align.distance; //FIXME
                     console.log("Using parallel triangle side:");
                 } else {
-                    console.log("Using non-parallel triangle side")
+                    console.log("Using non-parallel triangle side");
                     align.distance = -1;
                 }
         } else {
@@ -445,9 +444,9 @@ function onBodyLoad() {
         var image = new Image();
         image.onload = function () {
             var ctx = rulerCanvas.getContext('2d');
-            ctx.drawImage(image, 0, 0)
+            ctx.drawImage(image, 0, 0);
             draw(ruler, rulerCanvas);
-        }
+        };
         image.src = RULER_SRC;
     }
 
@@ -477,8 +476,8 @@ function onBodyLoad() {
         checkCollide();
         if (collisions-length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            ruler.x = oldpos.x
-            ruler.y = oldpos.y
+            ruler.x = oldpos.x;
+            ruler.y = oldpos.y;
             getRulerCorners();
         }
         else
@@ -501,15 +500,15 @@ function onBodyLoad() {
         const deltaAngle = getAngle(p0, p) - baseAngle;
 
         // Compute coordinates relative p0 + sine/cosine.
-        const cos = Math.cos(deltaAngle)
-        const sin = Math.sin(deltaAngle)
+        const cos = Math.cos(deltaAngle);
+        const sin = Math.sin(deltaAngle);
         var relCenter = subPoints(ruler, p0);
 
         const angle =
             leftHandle ? getAngle(ruler.ne, p) : getAngle(p, ruler.nw);
 
-        ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y
-        ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x
+        ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y;
+        ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x;
         ruler.angle = angle;
         getRulerCorners();
         checkCollide();
@@ -517,15 +516,15 @@ function onBodyLoad() {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
             // Find the k and l values for y = kx + l
             // Line perpendicular to ruler from p0
-            const ruler_k = (p1.y - p0.y)/(p1.x - p0.x)
-            const ruler_l = p0.y - ruler_k * p0.x
+            const ruler_k = (p1.y - p0.y)/(p1.x - p0.x);
+            const ruler_l = p0.y - ruler_k * p0.x;
             // Triangle edge line
-            const t = facingSides.triangle
-            const triangle_k = (t.p1.y - t.p0.y)/(t.p1.x - t.p0.x)
+            const t = facingSides.triangle;
+            const triangle_k = (t.p1.y - t.p0.y)/(t.p1.x - t.p0.x);
             const triangle_l = t.p0.y - triangle_k * t.p0.x;
             // Compute intersection and use that instead.
             const newpos =
-                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l)
+                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l);
             rotateRuler(ctx, newpos, leftHandle);
         }
         else
@@ -543,9 +542,9 @@ function onBodyLoad() {
         var image = new Image();
         image.onload = function () {
             var ctx = triangleCanvas.getContext('2d');
-            ctx.drawImage(image, 0, 0)
+            ctx.drawImage(image, 0, 0);
             draw(triangle, triangleCanvas);
-        }
+        };
         image.src = TRIANGLE_SRC;
     }
     /**
@@ -566,12 +565,12 @@ function onBodyLoad() {
             var angle1 =
                 getRelativeAngle(t1.p0, t1.p1, r1.p0, r1.p1) % Math.PI;
             var angle2 =
-                getRelativeAngle(t2.p0, t2.p1, r1.p0, r1.p1) % Math.PI
+                getRelativeAngle(t2.p0, t2.p1, r1.p0, r1.p1) % Math.PI;
             if (Math.abs(angle1) > Math.abs(angle2))
-                angle1 = Math.PI - angle1
+                angle1 = Math.PI - angle1;
             else
-                angle2 = Math.PI - angle2
-            return angle1 < angle2 ? angle1 : -angle2
+                angle2 = Math.PI - angle2;
+            return angle1 < angle2 ? angle1 : -angle2;
         }
 
        /**
@@ -589,10 +588,10 @@ function onBodyLoad() {
             /** Given angles min, max and a check if min < a <= max */
             function between(min, a, max) {
                 if (min > max) {
-                    min = (min + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-                    max = (max + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+                    min = (min + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+                    max = (max + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
                 }
-                return min < a && a <= max
+                return min < a && a <= max;
             }
 
             const cwAngle = getAngle(triangle, s1.p0, true);
@@ -604,9 +603,9 @@ function onBodyLoad() {
             //    + ", corner: " + cornerAngle/3.14 *180);
 
             if (between(cornerAngle, dragAngle, ccwAngle))
-                return -1
+                return -1;
             if (between(cwAngle, dragAngle, cornerAngle))
-                return 1
+                return 1;
             return 0;
         }
 
@@ -615,7 +614,7 @@ function onBodyLoad() {
          * not beyond ruler edge defined by maxAngle.
          */
         function rotateCcw(oldpos, p0, maxAngle) {
-            const newAngle = getAngle(p0, triangle)
+            const newAngle = getAngle(p0, triangle);
             // Determine magnitude and angle for old
             // and new center relative p0
             const oldAngle = getAngle(p0, oldpos);
@@ -623,9 +622,9 @@ function onBodyLoad() {
             rotAngle = Math.abs(rotAngle) > Math.abs(maxAngle) ?
                 maxAngle : rotAngle;
 
-            const center = subPoints(triangle, p0)
-            const length = Math.sqrt(center.x * center.x
-                                     + center.y * center.y)
+            const center = subPoints(triangle, p0);
+            const length = Math.sqrt(center.x * center.x + 
+                                     center.y * center.y);
             // Compute x,y center displacement when rotating around p0
             const diff = {
                 x: length * Math.cos(rotAngle),
@@ -635,8 +634,8 @@ function onBodyLoad() {
             //console.log("diff: ", diff);
             //console.log("Old center, x: " + triangle.x + ", y: " + triangle.y);
             //console.log("length: " + length);
-            triangle.x = p0.x + diff.x
-            triangle.y = p0.y + diff.y
+            triangle.x = p0.x + diff.x;
+            triangle.y = p0.y + diff.y;
             //console.log( "New center, x: " + triangle.x + ", y: " + triangle.y);
             triangle.angle  += rotAngle;
         }
@@ -648,24 +647,24 @@ function onBodyLoad() {
         const side3 = rulerSideByIndex(collisions[0][1]);
         const alignAngle = triangleAlignAngle(side1, side2, side3);
         console.log("Align angle: " + alignAngle / 3.14 * 180);
-        const dragAngle = getAngle(oldpos, triangle, true)
+        const dragAngle = getAngle(oldpos, triangle, true);
         const action =
             compareDrag(side1, side2, dragAngle);
         if (action == -1) {
-            var a = getAngle(side1.p1, oldpos)
-            var b = getAngle(side1.p1, triangle)
+            var a = getAngle(side1.p1, oldpos);
+            var b = getAngle(side1.p1, triangle);
             var c = b - a;
             var newAngle = Math.abs(c) > alignAngle ? alignAngle : c;
-            rotateCcw(oldpos, side1.p1, newAngle)
+            rotateCcw(oldpos, side1.p1, newAngle);
         }
         else if (action == 1)
-            console.log("rotate cw")
+            console.log("rotate cw");
         else
             console.log("drag back, distance: " + align.distance);
 
         // For now: block movements:
-        triangle.x = oldpos.x
-        triangle.y = oldpos.y
+        triangle.x = oldpos.x;
+        triangle.y = oldpos.y;
         collisions = [];
         // console.log("Corner collide, angle: " + angle/3.14 * 180);
     }
@@ -677,13 +676,13 @@ function onBodyLoad() {
             // We cannot align (no potential sides).
             return;
         const facingSides = getFacingSides();
-        if (facingSides.ruler == null || facingSides.triangle == null)
+        if (facingSides.ruler === null || facingSides.triangle === null)
             // No facing long side, i. e. a short one:
             return;
         if (align.distance < 0) {
             // Get diff between ruler and triangle angle and adjust.
-            const side1 = facingSides.ruler
-            const side2 = facingSides.triangle
+            const side1 = facingSides.ruler;
+            const side2 = facingSides.triangle;
             // const side1 = triangleSideByIndex(collisions[0][0]);
             // const side2 = triangleSideByIndex(collisions[1][0]);
             // const rulerSide = rulerSideByIndex(collisions[0][1]);
@@ -707,8 +706,8 @@ function onBodyLoad() {
             return;
 
         if (Math.abs(distance) <= 5 ) {
-            console.info("Attaching triangle")
-            const oldPos = {x: triangle.x, y:triangle.y}
+            console.info("Attaching triangle");
+            const oldPos = {x: triangle.x, y:triangle.y};
             // Get line perpendicular to ruler and move triangle along it.
             var toRuler = ruler.angle - Math.PI / 2;
             if (toRuler < 0)
@@ -724,8 +723,8 @@ function onBodyLoad() {
             const c2 =
                 isIntersecting(triangle.right, triangle.top, l1.p0, l1.p1);
             if (c1 || c2) {
-                triangle.x = oldPos.x
-                triangle.y = oldPos.y
+                triangle.x = oldPos.x;
+                triangle.y = oldPos.y;
             }
         }
     }
@@ -737,7 +736,7 @@ function onBodyLoad() {
         const dragAngle =
             getRelativeAngle(triangle, p, triangle.left, triangle.right);
         const facingSides = getFacingSides();
-        if (facingSides.triangle == null) {
+        if (facingSides.triangle === null) {
             console.log("slideTriangle: No triangle side, giving up.");
             return;
         }
@@ -776,13 +775,13 @@ function onBodyLoad() {
         var oldpos = { x: triangle.x, y: triangle.y };
         clear(ctx, triangle);
         checkAlign();
-        if (align.distance != null && align.distance < 6) {
+        if (align.distance !== null && align.distance < 6) {
                 //slideTriangle(p)
                 alignTriangle();
         } else {
             triangle.x = p.x;
             triangle.y = p.y;
-            getTriangleCorners()
+            getTriangleCorners();
             checkCollide();
             if (collisions.length == 2)
                 cornerCollideTriangle(oldpos);
@@ -819,25 +818,25 @@ function onBodyLoad() {
         const deltaAngle = getAngle(p0, p) - baseAngle;
 
         // Compute coordinates relative p0 + sine/cosine.
-        const cos = Math.cos(deltaAngle)
-        const sin = Math.sin(deltaAngle)
+        const cos = Math.cos(deltaAngle);
+        const sin = Math.sin(deltaAngle);
         const relCenter = subPoints(triangle, p0);
         const relTop = subPoints(triangle.top, p0);
 
         // Rotate the relative coordinates and update triangle center/angle
-        triangle.top.x = p0.x + cos*relTop.x - sin*relTop.y
-        triangle.top.y = p0.y + cos*relTop.y + sin*relTop.x
-        triangle.x = p0.x + cos*relCenter.x - sin*relCenter.y
-        triangle.y = p0.y + cos*relCenter.y + sin*relCenter.x
+        triangle.top.x = p0.x + cos*relTop.x - sin*relTop.y;
+        triangle.top.y = p0.y + cos*relTop.y + sin*relTop.x;
+        triangle.x = p0.x + cos*relCenter.x - sin*relCenter.y;
+        triangle.y = p0.y + cos*relCenter.y + sin*relCenter.x;
         triangle.angle = getAngle(triangle.top, triangle) - Math.PI/2;
         getTriangleCorners();
 
-        checkCollide()
+        checkCollide();
         if (collisions.length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            const corner = facingSides.triangleIx == 0 ? p1 : triangle.top;
+            const corner = facingSides.triangleIx === 0 ? p1 : triangle.top;
             var newpos = getClosestPoint(corner, facingSides.ruler);
-            if (facingSides.triangleIx != 0) {
+            if (facingSides.triangleIx !== 0) {
                 // The top collides into ruler. Either a cw rotation pulled
                 // by left handle or a ccw pulled by the right one. Compute
                 // the new p1 (handle position) by tracking back from top's
@@ -868,13 +867,13 @@ function onBodyLoad() {
         const rotatedHeight = {x: -sin * height, y: cos * height};
 
         triangle.middle =
-            addPoints(triangle, {x: sin * height, y: -cos * height} )
+            addPoints(triangle, {x: sin * height, y: -cos * height} );
         triangle.left = subPoints(triangle.middle, rotatedWidth);
         triangle.right = addPoints(triangle.middle, rotatedWidth);
         triangle.top = addPoints(triangle, rotatedHeight);
     }
 
-    /** Return reflecting possible handle "near" to p, or null. */
+    /** Return tool reflecting possible handle "near" to p, or null. */
     function findNearbyTool(p, canvas) {
         if (distance(p, ruler) < HANDLE_WIDTH)
             return 'moveRuler';
@@ -904,7 +903,7 @@ function onBodyLoad() {
         var canvas = document.getElementById('mapCanvas');
         var p = getMousePos(e, canvas);
         currentTool = findNearbyTool(p, canvas);
-        if (currentTool != null)
+        if (currentTool !== null)
             setMoveCursor();
     }
 
@@ -925,7 +924,7 @@ function onBodyLoad() {
             'rotateTriangleLeft': rotateTriangle,
             'rotateTriangleRight':
                 function(c, p) { rotateTriangle(c, p, false); }
-        }
+        };
         var canvas = document.getElementById('mapCanvas');
         var ctx = canvas.getContext('2d');
 
@@ -936,14 +935,14 @@ function onBodyLoad() {
             document.getElementById('angle').innerHTML =
                 getAngle(p, triangle) * 180 / Math.PI;
 
-            if (findNearbyTool(p, canvas) != null)
-                setMoveCursor()
-            else if (currentTool == null)
-                setMoveCursor(false)
-            if (e.buttons != 1 || currentTool == null)
+            if (findNearbyTool(p, canvas) !== null)
+                setMoveCursor();
+            else if (currentTool === null)
+                setMoveCursor(false);
+            if (e.buttons !== 1 || currentTool === null)
                 return;
             handlerByTool[currentTool](ctx, p);
-        };
+        }
 
         return onMousemove;
     })();
@@ -962,5 +961,4 @@ function onBodyLoad() {
 
     initTriangle();
     initRuler();
-
 }
