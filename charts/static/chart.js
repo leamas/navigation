@@ -57,7 +57,7 @@ function onBodyLoad() {
 
     /**
      * Aligning data: the two sides closest to a align. If there is one
-     * collision, this is the one of the two ihtersecting sides with the
+     * collision, this is the one of the two intersecting sides with the
      * smallest angle.
      * If there is two collisions, this is the side which is not colliding
      * i. e., is contained by the ruler.
@@ -199,7 +199,7 @@ function onBodyLoad() {
 
     /**
      * Return a {centerLine, ruler, triangle, rulerIx, triangleIx} dictionary
-     * with the line from * triangle to ruler center, the triangle side facing
+     * with the line from triangle to ruler center, the triangle side facing
      * the ruler and the ruler side facing the triangle.
      */
     function getFacingSides() {
@@ -229,6 +229,7 @@ function onBodyLoad() {
                 result.rulerIx = r;
                 break;
             }
+
         }
         if (isNaN(result.ruler)) {
             // No facing long ruler edge.
@@ -486,7 +487,9 @@ function onBodyLoad() {
     }
 
     /** Rotate ruler according to new handle position. */
-    function rotateRuler(ctx, p, leftHandle = true) {
+    function rotateRuler(ctx, p, leftHandle = true, depth = 1) {
+        if (depth > 2)
+            return;
         const oldpos = { x: triangle.x, y: triangle.y };
         const oldAngle = ruler.angle;
         const facingSides = getFacingSides();
@@ -495,7 +498,9 @@ function onBodyLoad() {
 
         // Compute rotation center p0 and baseline angle diff.
         const p0 = leftHandle ? ruler.ne : ruler.nw;
-        const p1 = leftHandle ? ruler.nw : ruler.ne;
+        var p1;
+            //p1 = leftHandle ? ruler.nw : ruler.ne;
+            p1 = leftHandle ? ruler.nw : ruler.ne;
         const baseAngle = getAngle(p0, p1);
         const deltaAngle = getAngle(p0, p) - baseAngle;
 
@@ -504,8 +509,7 @@ function onBodyLoad() {
         const sin = Math.sin(deltaAngle);
         var relCenter = subPoints(ruler, p0);
 
-        const angle =
-            leftHandle ? getAngle(ruler.ne, p) : getAngle(p, ruler.nw);
+        const angle = leftHandle ? getAngle(p0, p) : getAngle(p, p0);
 
         ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y;
         ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x;
@@ -514,18 +518,19 @@ function onBodyLoad() {
         checkCollide();
         if (collisions.length > 0) {
             document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            // Find the k and l values for y = kx + l
-            // Line perpendicular to ruler from p0
-            const ruler_k = (p1.y - p0.y)/(p1.x - p0.x);
-            const ruler_l = p0.y - ruler_k * p0.x;
-            // Triangle edge line
-            const t = facingSides.triangle;
-            const triangle_k = (t.p1.y - t.p0.y)/(t.p1.x - t.p0.x);
-            const triangle_l = t.p0.y - triangle_k * t.p0.x;
-            // Compute intersection and use that instead.
-            const newpos =
-                getIntersection(triangle_k, triangle_l, ruler_k, ruler_l);
-            rotateRuler(ctx, newpos, leftHandle);
+            const corner = p1;
+            var newpos = getClosestPoint(p1, facingSides.triangle);
+            const edge = getAngle(newpos, p0);
+            const cos = Math.cos(edge);
+            const sin = Math.sin(edge);
+            // Compute new center relative the handle
+            if (leftHandle) {
+                newpos =  {
+                    x: p0.x + cos*RULER_WIDTH/2,
+                    y: p0.y + sin*RULER_WIDTH/2
+                };
+            }
+            rotateRuler(ctx, newpos, leftHandle, depth + 1);
         }
         else
             document.getElementById('collision').innerHTML = "no"; //FIXME
@@ -623,7 +628,7 @@ function onBodyLoad() {
                 maxAngle : rotAngle;
 
             const center = subPoints(triangle, p0);
-            const length = Math.sqrt(center.x * center.x + 
+            const length = Math.sqrt(center.x * center.x +
                                      center.y * center.y);
             // Compute x,y center displacement when rotating around p0
             const diff = {
@@ -806,8 +811,6 @@ function onBodyLoad() {
     function rotateTriangle(ctx, p, rightHandle = true, depth = 0) {
         if (depth > 1)
             return;
-        const oldpos = { x: triangle.x, y: triangle.y };
-        const oldAngle = triangle.angle;
         const facingSides = getFacingSides();
         clear(ctx, triangle);
 
