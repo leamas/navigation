@@ -490,50 +490,44 @@ function onBodyLoad() {
     function rotateRuler(ctx, p, leftHandle = true, depth = 1) {
         if (depth > 2)
             return;
-        const oldpos = { x: triangle.x, y: triangle.y };
-        const oldAngle = ruler.angle;
         const facingSides = getFacingSides();
         clear(ctx, ruler);
         clear(ctx, triangle);
 
-        // Compute rotation center p0 and baseline angle diff.
-        const p0 = leftHandle ? ruler.ne : ruler.nw;
-        var p1;
-            //p1 = leftHandle ? ruler.nw : ruler.ne;
+	var p0;    // Rotation center
+	var p1;    // Handle 
+	if (facingSides.rulerIx == 2) {
+            p0 = leftHandle ? ruler.se : ruler.sw;
+            p1 = leftHandle ? ruler.sw : ruler.se;
+	} else {
+            p0 = leftHandle ? ruler.ne : ruler.nw;
             p1 = leftHandle ? ruler.nw : ruler.ne;
+	}
         const baseAngle = getAngle(p0, p1);
-        const deltaAngle = getAngle(p0, p) - baseAngle;
 
         // Compute coordinates relative p0 + sine/cosine.
+        const deltaAngle = getAngle(p0, p) - baseAngle;
+        const relCenter = subPoints(ruler, p0);
         const cos = Math.cos(deltaAngle);
         const sin = Math.sin(deltaAngle);
-        var relCenter = subPoints(ruler, p0);
 
-        const angle = leftHandle ? getAngle(p0, p) : getAngle(p, p0);
-
+	// Compute new position and angle
         ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y;
         ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x;
-        ruler.angle = angle;
+        ruler.angle = leftHandle ? getAngle(p0, p) : getAngle(p, p0);
+	    
         getRulerCorners();
         checkCollide();
         if (collisions.length > 0) {
-            document.getElementById('collision').innerHTML = "Yes"; //FIXME
-            const corner = p1;
             var newpos = getClosestPoint(p1, facingSides.triangle);
             const edge = getAngle(newpos, p0);
-            const cos = Math.cos(edge);
-            const sin = Math.sin(edge);
             // Compute new center relative the handle
-            if (leftHandle) {
-                newpos =  {
-                    x: p0.x + cos*RULER_WIDTH/2,
-                    y: p0.y + sin*RULER_WIDTH/2
-                };
-            }
+            newpos = {
+                x: p0.x + Math.cos(edge)*RULER_WIDTH/2,
+                y: p0.y + Math.sin(edge)*RULER_WIDTH/2
+            };
             rotateRuler(ctx, newpos, leftHandle, depth + 1);
         }
-        else
-            document.getElementById('collision').innerHTML = "no"; //FIXME
         draw(ruler, rulerCanvas);
         draw(triangle, triangleCanvas);
     }
