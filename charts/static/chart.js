@@ -62,7 +62,7 @@ function onBodyLoad() {
      * If there is two collisions, this is the side which is not colliding
      * i. e., is contained by the ruler.
      *
-     * If no intersection this is eitjer empty or two sides both
+     * If no intersection this is either empty or two sides both
      * intersecting the line between the triangle and the ruler center.
      * Aligning refers to side numbers. First ruler side is nw -> ne, the
      * rest counted clockwise. The first triangle side0  is the left -> right,
