@@ -487,15 +487,21 @@ function onBodyLoad() {
     }
 
     /** Rotate ruler according to new handle position. */
-    function rotateRuler(ctx, p, leftHandle = true, depth = 1) {
-        if (depth > 2)
-            return;
+    function rotateRuler(ctx, p, leftHandle = true) {
+
+        function moveRuler(center, relCenter, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y;
+            ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x;
+        };
+
         const facingSides = getFacingSides();
         clear(ctx, ruler);
         clear(ctx, triangle);
 
 	var p0;    // Rotation center
-	var p1;    // Handle 
+	var p1;    // Handle
 	if (facingSides.rulerIx == 2) {
             p0 = leftHandle ? ruler.se : ruler.sw;
             p1 = leftHandle ? ruler.sw : ruler.se;
@@ -505,28 +511,24 @@ function onBodyLoad() {
 	}
         const baseAngle = getAngle(p0, p1);
 
-        // Compute coordinates relative p0 + sine/cosine.
-        const deltaAngle = getAngle(p0, p) - baseAngle;
+        // Compute coordinates relative p0 + sine/cosine. Be optimistic,
+        // assume it won't collide.
         const relCenter = subPoints(ruler, p0);
-        const cos = Math.cos(deltaAngle);
-        const sin = Math.sin(deltaAngle);
-
-	// Compute new position and angle
-        ruler.x = p0.x + cos*relCenter.x - sin*relCenter.y;
-        ruler.y = p0.y + cos*relCenter.y + sin*relCenter.x;
+        const deltaAngle = getAngle(p0, p) - baseAngle;
+        moveRuler(p0, relCenter, deltaAngle);
         ruler.angle = leftHandle ? getAngle(p0, p) : getAngle(p, p0);
-	    
+
         getRulerCorners();
         checkCollide();
         if (collisions.length > 0) {
-            var newpos = getClosestPoint(p1, facingSides.triangle);
-            const edge = getAngle(newpos, p0);
-            // Compute new center relative the handle
-            newpos = {
-                x: p0.x + Math.cos(edge)*RULER_WIDTH/2,
-                y: p0.y + Math.sin(edge)*RULER_WIDTH/2
-            };
-            rotateRuler(ctx, newpos, leftHandle, depth + 1);
+            // Colliding. Adjust colliding corner to triangle edge
+            // and recalculate position
+            const newpos = getClosestPoint(p1, facingSides.triangle);
+            const deltaEdge = getAngle(p0, newpos) - baseAngle;
+            moveRuler(p0, relCenter, deltaEdge);
+            ruler.angle =
+                leftHandle ? getAngle(p0, newpos) : getAngle(newpos, p0);
+            getRulerCorners();
         }
         draw(ruler, rulerCanvas);
         draw(triangle, triangleCanvas);
